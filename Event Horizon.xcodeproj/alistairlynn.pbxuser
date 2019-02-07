@@ -1,0 +1,171 @@
+// !$*UTF8*$!
+{
+	20286C28FDCF999611CA2CEA /* Project object */ = {
+		activeBuildConfigurationName = Release;
+		activeExecutable = 4959B91E0CE0DCD20004B92F /* Event Horizon */;
+		activeTarget = 8D0C4E890486CD37000505A6 /* Event Horizon */;
+		breakpointsGroup = 4959B9490CE0DD0F0004B92F /* XCBreakpointsBucket */;
+		codeSenseManager = 4959B9460CE0DCF90004B92F /* Code sense */;
+		executables = (
+			4959B91E0CE0DCD20004B92F /* Event Horizon */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					271,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					200,
+					91,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 216063186;
+			PBXWorkspaceStateSaveDate = 216063186;
+		};
+		sourceControlManager = 4959B9450CE0DCF90004B92F /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	32DBCF6D0370B57F00C91783 /* EVH_Prefix.pch */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {960, 531}}";
+			sepNavSelRange = "{146, 0}";
+			sepNavVisRect = "{{0, 0}, {960, 531}}";
+			sepNavWindowFrame = "{{156, 253}, {1005, 660}}";
+		};
+	};
+	4959B91E0CE0DCD20004B92F /* Event Horizon */ = {
+		isa = PBXExecutable;
+		activeArgIndex = 2147483647;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = "Event Horizon";
+		sourceDirectories = (
+		);
+	};
+	4959B9450CE0DCF90004B92F /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+		scmType = "";
+	};
+	4959B9460CE0DCF90004B92F /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	4959B9490CE0DD0F0004B92F /* XCBreakpointsBucket */ = {
+		isa = XCBreakpointsBucket;
+		name = "Project Breakpoints";
+		objects = (
+		);
+	};
+	8D0C4E890486CD37000505A6 /* Event Horizon */ = {
+		activeExec = 0;
+		executables = (
+			4959B91E0CE0DCD20004B92F /* Event Horizon */,
+		);
+	};
+	DA9E65A60B0986540068BF4D /* Weapon.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {960, 896}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {960, 531}}";
+			sepNavWindowFrame = "{{450, 17}, {1005, 660}}";
+		};
+	};
+	DA9E65AD0B0986540068BF4D /* SpaceObject.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {960, 1372}}";
+			sepNavSelRange = "{309, 0}";
+			sepNavVisRect = "{{0, 0}, {960, 531}}";
+			sepNavWindowFrame = "{{133, 274}, {1005, 660}}";
+		};
+	};
+	DA9E65BA0B0986540068BF4D /* Controller.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {960, 1806}}";
+			sepNavSelRange = "{2561, 0}";
+			sepNavVisRect = "{{0, 770}, {960, 531}}";
+			sepNavWindowFrame = "{{179, 232}, {1005, 660}}";
+		};
+	};
+	DA9E65D00B0986540068BF4D /* Coord.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {960, 531}}";
+			sepNavSelRange = "{210, 1}";
+			sepNavVisRect = "{{0, 0}, {960, 531}}";
+			sepNavWindowFrame = "{{110, 295}, {1005, 660}}";
+		};
+	};
+	DA9E65D30B0986710068BF4D /* Weapon.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1022, 5754}}";
+			sepNavSelRange = "{11558, 0}";
+			sepNavVisRect = "{{0, 4292}, {960, 531}}";
+			sepNavWindowFrame = "{{202, 211}, {1005, 660}}";
+		};
+	};
+	DA9E65DA0B0986710068BF4D /* SoundManager.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {960, 1848}}";
+			sepNavSelRange = "{220, 0}";
+			sepNavVisRect = "{{0, 0}, {960, 531}}";
+			sepNavWindowFrame = "{{248, 169}, {1005, 660}}";
+		};
+	};
+	DAE062070B098CED00487FD7 /* Plugin */ = {
+		activeExec = 0;
+	};
+}

@@ -1,0 +1,24 @@
+WIMP AI
+Runs away and jumps to another system or lands on a nearby planet when attacked,
+does not use weapons at all.
+
+MERCHANT AI
+Fights back when its attacker is close, but jumps out or lands when it is
+farther away.
+
+AGGRESSOR AI
+Attacks any ship of a different government, jumps out if none are present.
+
+=================================
+
+FLEETS
+Fleets have three strategies to attack their enemies: gang up on least threatening,
+most threatening, or try to match evenly. The choice is determined by the fleet leader,
+which may base it's choice on various parameters.
+
+When unattached combat vehicles jump into a system, they are assigned to a default fleet,
+one per government, which is owned by the highest ranking vessel in the fleet. That
+vessel determines the attack strategy, and may also issue a retreat command.
+
+The leader of a fleet that jumps into a system may register with the default fleet or not,
+at its discretion.

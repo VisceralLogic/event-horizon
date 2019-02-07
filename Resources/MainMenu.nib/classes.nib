@@ -1,0 +1,37 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {
+                changeResolution = id; 
+                fullScreen = id; 
+                hide = id; 
+                hideOtherApplications = id; 
+                orderFrontStandardAboutPanel = id; 
+                terminate = id; 
+                unhideAllApplications = id; 
+            }; 
+            CLASS = Interface; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = MyForm; LANGUAGE = ObjC; SUPERCLASS = NSForm; }, 
+        {CLASS = MyWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
+        {
+            ACTIONS = {cancel = id; ok = id; }; 
+            CLASS = Preferences; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                flight = NSForm; 
+                misc = NSForm; 
+                navigation = NSForm; 
+                targeting = NSForm; 
+                views = NSForm; 
+                weapons = NSForm; 
+                window = NSWindow; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}

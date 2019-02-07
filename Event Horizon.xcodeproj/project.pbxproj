@@ -1,0 +1,793 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4959B9D00CE0E1D40004B92F /* FScript.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = DA9E66650B0987790068BF4D /* FScript.framework */; };
+		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
+		8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20286C33FDCF999611CA2CEA /* Carbon.framework */; };
+		DA083FB50E60A59A00F375DC /* Changes.txt in Resources */ = {isa = PBXBuildFile; fileRef = DA083FB40E60A59A00F375DC /* Changes.txt */; };
+		DA9E65FC0B0986710068BF4D /* BackgroundMusic.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65D10B0986710068BF4D /* BackgroundMusic.m */; };
+		DA9E65FD0B0986710068BF4D /* WimpAI.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65D20B0986710068BF4D /* WimpAI.m */; };
+		DA9E65FE0B0986710068BF4D /* Weapon.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65D30B0986710068BF4D /* Weapon.m */; };
+		DA9E65FF0B0986710068BF4D /* Type.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65D40B0986710068BF4D /* Type.m */; };
+		DA9E66000B0986710068BF4D /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65D50B0986710068BF4D /* Texture.m */; };
+		DA9E66010B0986710068BF4D /* StarDust.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65D60B0986710068BF4D /* StarDust.m */; };
+		DA9E66020B0986710068BF4D /* Stack.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65D70B0986710068BF4D /* Stack.m */; };
+		DA9E66030B0986710068BF4D /* Spaceship.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65D80B0986710068BF4D /* Spaceship.m */; };
+		DA9E66040B0986710068BF4D /* SpaceObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65D90B0986710068BF4D /* SpaceObject.m */; };
+		DA9E66050B0986710068BF4D /* SoundManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65DA0B0986710068BF4D /* SoundManager.m */; };
+		DA9E66060B0986710068BF4D /* Solarsystem.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65DB0B0986710068BF4D /* Solarsystem.m */; };
+		DA9E66070B0986710068BF4D /* ShieldSpot.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65DC0B0986710068BF4D /* ShieldSpot.m */; };
+		DA9E66080B0986710068BF4D /* Prefs.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65DD0B0986710068BF4D /* Prefs.m */; };
+		DA9E66090B0986710068BF4D /* Player.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65DE0B0986710068BF4D /* Player.m */; };
+		DA9E660A0B0986710068BF4D /* Object3D.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65DF0B0986710068BF4D /* Object3D.m */; };
+		DA9E660B0B0986710068BF4D /* OBJ.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65E00B0986710068BF4D /* OBJ.m */; };
+		DA9E660C0B0986710068BF4D /* Cargo.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65E10B0986710068BF4D /* Cargo.m */; };
+		DA9E660D0B0986710068BF4D /* MyWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65E20B0986710068BF4D /* MyWindow.m */; };
+		DA9E660E0B0986710068BF4D /* Mod.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65E30B0986710068BF4D /* Mod.m */; };
+		DA9E660F0B0986710068BF4D /* Mission.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65E40B0986710068BF4D /* Mission.m */; };
+		DA9E66100B0986710068BF4D /* AI.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65E50B0986710068BF4D /* AI.m */; };
+		DA9E66110B0986710068BF4D /* ControllerScripting.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65E60B0986710068BF4D /* ControllerScripting.m */; };
+		DA9E66120B0986710068BF4D /* ControllerMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65E70B0986710068BF4D /* ControllerMenu.m */; };
+		DA9E66130B0986710068BF4D /* Asteroid.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65E80B0986710068BF4D /* Asteroid.m */; };
+		DA9E66140B0986710068BF4D /* Board.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65E90B0986710068BF4D /* Board.m */; };
+		DA9E66150B0986710068BF4D /* Console.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65EA0B0986710068BF4D /* Console.m */; };
+		DA9E66160B0986710068BF4D /* Background.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65EB0B0986710068BF4D /* Background.m */; };
+		DA9E66170B0986710068BF4D /* Interface.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65EC0B0986710068BF4D /* Interface.m */; };
+		DA9E66180B0986710068BF4D /* Government.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65ED0B0986710068BF4D /* Government.m */; };
+		DA9E66190B0986710068BF4D /* Forklift.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65EE0B0986710068BF4D /* Forklift.m */; };
+		DA9E661A0B0986710068BF4D /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65EF0B0986710068BF4D /* Controller.m */; };
+		DA9E661B0B0986710068BF4D /* MerchantAI.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65F00B0986710068BF4D /* MerchantAI.m */; };
+		DA9E661C0B0986710068BF4D /* Map.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65F10B0986710068BF4D /* Map.m */; };
+		DA9E661D0B0986710068BF4D /* Inventory.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65F20B0986710068BF4D /* Inventory.m */; };
+		DA9E661E0B0986710068BF4D /* CutScene.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65F30B0986710068BF4D /* CutScene.m */; };
+		DA9E661F0B0986710068BF4D /* AggressorAI.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65F40B0986710068BF4D /* AggressorAI.m */; };
+		DA9E66200B0986710068BF4D /* EHMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65F50B0986710068BF4D /* EHMenuItem.m */; };
+		DA9E66210B0986710068BF4D /* EHMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65F60B0986710068BF4D /* EHMenu.m */; };
+		DA9E66220B0986710068BF4D /* ControllerGraphics.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65F70B0986710068BF4D /* ControllerGraphics.m */; };
+		DA9E66230B0986710068BF4D /* EHButton.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65F80B0986710068BF4D /* EHButton.m */; };
+		DA9E66240B0986710068BF4D /* Planet.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65F90B0986710068BF4D /* Planet.m */; };
+		DA9E66250B0986710068BF4D /* Coord.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65FA0B0986710068BF4D /* Coord.m */; };
+		DA9E66260B0986710068BF4D /* ControllerThreading.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E65FB0B0986710068BF4D /* ControllerThreading.m */; };
+		DA9E66360B0987120068BF4D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E66330B0987120068BF4D /* main.m */; };
+		DA9E66370B0987120068BF4D /* KeyMapNames.c in Sources */ = {isa = PBXBuildFile; fileRef = DA9E66340B0987120068BF4D /* KeyMapNames.c */; };
+		DA9E66380B0987120068BF4D /* aglString.c in Sources */ = {isa = PBXBuildFile; fileRef = DA9E66350B0987120068BF4D /* aglString.c */; };
+		DA9E66660B0987790068BF4D /* FScript.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA9E66650B0987790068BF4D /* FScript.framework */; };
+		DA9E666D0B0987A70068BF4D /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA9E66690B0987A70068BF4D /* AGL.framework */; };
+		DA9E666E0B0987A70068BF4D /* DrawSprocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA9E666A0B0987A70068BF4D /* DrawSprocket.framework */; };
+		DA9E666F0B0987A70068BF4D /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA9E666B0B0987A70068BF4D /* OpenAL.framework */; };
+		DA9E66700B0987A70068BF4D /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA9E666C0B0987A70068BF4D /* OpenGL.framework */; };
+		DA9E667A0B0987CA0068BF4D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA9E66790B0987CA0068BF4D /* Cocoa.framework */; };
+		DAE0620D0B098CFC00487FD7 /* Plugin.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9E66270B0986830068BF4D /* Plugin.m */; };
+		DAE0620E0B098D0400487FD7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA9E66790B0987CA0068BF4D /* Cocoa.framework */; };
+		DAEFF2780B0C35E200A4C317 /* TabView2.png in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF26C0B0C35E200A4C317 /* TabView2.png */; };
+		DAEFF2790B0C35E200A4C317 /* Button.png in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF26D0B0C35E200A4C317 /* Button.png */; };
+		DAEFF27A0B0C35E200A4C317 /* ShieldSpot.png in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF26E0B0C35E200A4C317 /* ShieldSpot.png */; };
+		DAEFF27B0B0C35E200A4C317 /* Widgets.png in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF26F0B0C35E200A4C317 /* Widgets.png */; };
+		DAEFF27C0B0C35E200A4C317 /* Asteroid.png in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2700B0C35E200A4C317 /* Asteroid.png */; };
+		DAEFF27D0B0C35E200A4C317 /* Fire.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2710B0C35E200A4C317 /* Fire.jpg */; };
+		DAEFF27E0B0C35E200A4C317 /* Split.png in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2720B0C35E200A4C317 /* Split.png */; };
+		DAEFF27F0B0C35E200A4C317 /* Icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2730B0C35E200A4C317 /* Icon.icns */; };
+		DAEFF2800B0C35E200A4C317 /* NavPlanet.tiff in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2740B0C35E200A4C317 /* NavPlanet.tiff */; };
+		DAEFF2810B0C35E200A4C317 /* LogoLarge.png in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2750B0C35E200A4C317 /* LogoLarge.png */; };
+		DAEFF2820B0C35E200A4C317 /* Menu.png in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2760B0C35E200A4C317 /* Menu.png */; };
+		DAEFF2830B0C35E200A4C317 /* TabView.png in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2770B0C35E200A4C317 /* TabView.png */; };
+		DAEFF28B0B0C35F600A4C317 /* Explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2840B0C35F600A4C317 /* Explosion.wav */; };
+		DAEFF28C0B0C35F600A4C317 /* intro.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2850B0C35F600A4C317 /* intro.mp3 */; };
+		DAEFF28D0B0C35F600A4C317 /* Mission.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2860B0C35F600A4C317 /* Mission.mp3 */; };
+		DAEFF28E0B0C35F600A4C317 /* Mod.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2870B0C35F600A4C317 /* Mod.mp3 */; };
+		DAEFF28F0B0C35F600A4C317 /* Refuel.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2880B0C35F600A4C317 /* Refuel.mp3 */; };
+		DAEFF2900B0C35F600A4C317 /* Ship.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2890B0C35F600A4C317 /* Ship.mp3 */; };
+		DAEFF2910B0C35F600A4C317 /* Trade.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF28A0B0C35F600A4C317 /* Trade.mp3 */; };
+		DAEFF2A70B0C36AA00A4C317 /* Forklift.gif in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF29F0B0C36AA00A4C317 /* Forklift.gif */; };
+		DAEFF2A80B0C36AA00A4C317 /* Forklift.mtl in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2A00B0C36AA00A4C317 /* Forklift.mtl */; };
+		DAEFF2A90B0C36AA00A4C317 /* Forklift.obj in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2A10B0C36AA00A4C317 /* Forklift.obj */; };
+		DAEFF2AA0B0C36AA00A4C317 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = DAEFF2A20B0C36AA00A4C317 /* MainMenu.nib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4959B99F0CE0E1BF0004B92F /* Copy Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				4959B9D00CE0E1D40004B92F /* FScript.framework in Copy Frameworks */,
+			);
+			name = "Copy Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0867D6ABFE840B52C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		20286C33FDCF999611CA2CEA /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		32DBCF6D0370B57F00C91783 /* EVH_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EVH_Prefix.pch; sourceTree = "<group>"; };
+		4A9504C8FFE6A3BC11CA0CBA /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
+		4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		8D0C4E960486CD37000505A6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8D0C4E970486CD37000505A6 /* Event Horizon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Event Horizon.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA083FB40E60A59A00F375DC /* Changes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Changes.txt; path = ../Current/Documentation/Changes.txt; sourceTree = SOURCE_ROOT; };
+		DA9E65A40B0986540068BF4D /* BackgroundMusic.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BackgroundMusic.h; path = EVH/BackgroundMusic.h; sourceTree = SOURCE_ROOT; };
+		DA9E65A50B0986540068BF4D /* WimpAI.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WimpAI.h; path = EVH/WimpAI.h; sourceTree = SOURCE_ROOT; };
+		DA9E65A60B0986540068BF4D /* Weapon.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Weapon.h; path = EVH/Weapon.h; sourceTree = SOURCE_ROOT; };
+		DA9E65A70B0986540068BF4D /* Type.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Type.h; path = EVH/Type.h; sourceTree = SOURCE_ROOT; };
+		DA9E65A80B0986540068BF4D /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Texture.h; path = EVH/Texture.h; sourceTree = SOURCE_ROOT; };
+		DA9E65A90B0986540068BF4D /* StarDust.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = StarDust.h; path = EVH/StarDust.h; sourceTree = SOURCE_ROOT; };
+		DA9E65AA0B0986540068BF4D /* Stack.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Stack.h; path = EVH/Stack.h; sourceTree = SOURCE_ROOT; };
+		DA9E65AB0B0986540068BF4D /* Spaceship.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Spaceship.h; path = EVH/Spaceship.h; sourceTree = SOURCE_ROOT; };
+		DA9E65AD0B0986540068BF4D /* SpaceObject.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SpaceObject.h; path = EVH/SpaceObject.h; sourceTree = SOURCE_ROOT; };
+		DA9E65AE0B0986540068BF4D /* SoundManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SoundManager.h; path = EVH/SoundManager.h; sourceTree = SOURCE_ROOT; };
+		DA9E65AF0B0986540068BF4D /* Solarsystem.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Solarsystem.h; path = EVH/Solarsystem.h; sourceTree = SOURCE_ROOT; };
+		DA9E65B00B0986540068BF4D /* ShieldSpot.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ShieldSpot.h; path = EVH/ShieldSpot.h; sourceTree = SOURCE_ROOT; };
+		DA9E65B10B0986540068BF4D /* Prefs.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Prefs.h; path = EVH/Prefs.h; sourceTree = SOURCE_ROOT; };
+		DA9E65B20B0986540068BF4D /* Player.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Player.h; path = EVH/Player.h; sourceTree = SOURCE_ROOT; };
+		DA9E65B30B0986540068BF4D /* Object3D.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Object3D.h; path = EVH/Object3D.h; sourceTree = SOURCE_ROOT; };
+		DA9E65B40B0986540068BF4D /* OBJ.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = OBJ.h; path = EVH/OBJ.h; sourceTree = SOURCE_ROOT; };
+		DA9E65B50B0986540068BF4D /* MyWindow.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = MyWindow.h; path = EVH/MyWindow.h; sourceTree = SOURCE_ROOT; };
+		DA9E65B60B0986540068BF4D /* ModProtocol.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ModProtocol.h; path = EVH/ModProtocol.h; sourceTree = SOURCE_ROOT; };
+		DA9E65B70B0986540068BF4D /* Mod.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Mod.h; path = EVH/Mod.h; sourceTree = SOURCE_ROOT; };
+		DA9E65B80B0986540068BF4D /* Mission.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Mission.h; path = EVH/Mission.h; sourceTree = SOURCE_ROOT; };
+		DA9E65B90B0986540068BF4D /* Cargo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Cargo.h; path = EVH/Cargo.h; sourceTree = SOURCE_ROOT; };
+		DA9E65BA0B0986540068BF4D /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Controller.h; path = EVH/Controller.h; sourceTree = SOURCE_ROOT; };
+		DA9E65BB0B0986540068BF4D /* ControllerScripting.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ControllerScripting.h; path = EVH/ControllerScripting.h; sourceTree = SOURCE_ROOT; };
+		DA9E65BC0B0986540068BF4D /* Console.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Console.h; path = EVH/Console.h; sourceTree = SOURCE_ROOT; };
+		DA9E65BD0B0986540068BF4D /* AI.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AI.h; path = EVH/AI.h; sourceTree = SOURCE_ROOT; };
+		DA9E65BE0B0986540068BF4D /* ControllerThreading.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ControllerThreading.h; path = EVH/ControllerThreading.h; sourceTree = SOURCE_ROOT; };
+		DA9E65BF0B0986540068BF4D /* Asteroid.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Asteroid.h; path = EVH/Asteroid.h; sourceTree = SOURCE_ROOT; };
+		DA9E65C00B0986540068BF4D /* EHMenu.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EHMenu.h; path = EVH/EHMenu.h; sourceTree = SOURCE_ROOT; };
+		DA9E65C10B0986540068BF4D /* Inventory.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Inventory.h; path = EVH/Inventory.h; sourceTree = SOURCE_ROOT; };
+		DA9E65C20B0986540068BF4D /* Interface.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Interface.h; path = EVH/Interface.h; sourceTree = SOURCE_ROOT; };
+		DA9E65C30B0986540068BF4D /* Government.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Government.h; path = EVH/Government.h; sourceTree = SOURCE_ROOT; };
+		DA9E65C40B0986540068BF4D /* Forklift.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Forklift.h; path = EVH/Forklift.h; sourceTree = SOURCE_ROOT; };
+		DA9E65C50B0986540068BF4D /* ControllerGraphics.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ControllerGraphics.h; path = EVH/ControllerGraphics.h; sourceTree = SOURCE_ROOT; };
+		DA9E65C60B0986540068BF4D /* Background.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Background.h; path = EVH/Background.h; sourceTree = SOURCE_ROOT; };
+		DA9E65C70B0986540068BF4D /* MerchantAI.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = MerchantAI.h; path = EVH/MerchantAI.h; sourceTree = SOURCE_ROOT; };
+		DA9E65C80B0986540068BF4D /* Map.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Map.h; path = EVH/Map.h; sourceTree = SOURCE_ROOT; };
+		DA9E65C90B0986540068BF4D /* EHButton.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EHButton.h; path = EVH/EHButton.h; sourceTree = SOURCE_ROOT; };
+		DA9E65CA0B0986540068BF4D /* Board.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Board.h; path = EVH/Board.h; sourceTree = SOURCE_ROOT; };
+		DA9E65CB0B0986540068BF4D /* AggressorAI.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AggressorAI.h; path = EVH/AggressorAI.h; sourceTree = SOURCE_ROOT; };
+		DA9E65CC0B0986540068BF4D /* EHMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EHMenuItem.h; path = EVH/EHMenuItem.h; sourceTree = SOURCE_ROOT; };
+		DA9E65CD0B0986540068BF4D /* ControllerMenu.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ControllerMenu.h; path = EVH/ControllerMenu.h; sourceTree = SOURCE_ROOT; };
+		DA9E65CE0B0986540068BF4D /* Planet.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Planet.h; path = EVH/Planet.h; sourceTree = SOURCE_ROOT; };
+		DA9E65CF0B0986540068BF4D /* CutScene.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = CutScene.h; path = EVH/CutScene.h; sourceTree = SOURCE_ROOT; };
+		DA9E65D00B0986540068BF4D /* Coord.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Coord.h; path = EVH/Coord.h; sourceTree = SOURCE_ROOT; };
+		DA9E65D10B0986710068BF4D /* BackgroundMusic.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = BackgroundMusic.m; path = EVH/BackgroundMusic.m; sourceTree = SOURCE_ROOT; };
+		DA9E65D20B0986710068BF4D /* WimpAI.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = WimpAI.m; path = EVH/WimpAI.m; sourceTree = SOURCE_ROOT; };
+		DA9E65D30B0986710068BF4D /* Weapon.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Weapon.m; path = EVH/Weapon.m; sourceTree = SOURCE_ROOT; };
+		DA9E65D40B0986710068BF4D /* Type.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Type.m; path = EVH/Type.m; sourceTree = SOURCE_ROOT; };
+		DA9E65D50B0986710068BF4D /* Texture.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Texture.m; path = EVH/Texture.m; sourceTree = SOURCE_ROOT; };
+		DA9E65D60B0986710068BF4D /* StarDust.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = StarDust.m; path = EVH/StarDust.m; sourceTree = SOURCE_ROOT; };
+		DA9E65D70B0986710068BF4D /* Stack.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Stack.m; path = EVH/Stack.m; sourceTree = SOURCE_ROOT; };
+		DA9E65D80B0986710068BF4D /* Spaceship.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Spaceship.m; path = EVH/Spaceship.m; sourceTree = SOURCE_ROOT; };
+		DA9E65D90B0986710068BF4D /* SpaceObject.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = SpaceObject.m; path = EVH/SpaceObject.m; sourceTree = SOURCE_ROOT; };
+		DA9E65DA0B0986710068BF4D /* SoundManager.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = SoundManager.m; path = EVH/SoundManager.m; sourceTree = SOURCE_ROOT; };
+		DA9E65DB0B0986710068BF4D /* Solarsystem.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Solarsystem.m; path = EVH/Solarsystem.m; sourceTree = SOURCE_ROOT; };
+		DA9E65DC0B0986710068BF4D /* ShieldSpot.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = ShieldSpot.m; path = EVH/ShieldSpot.m; sourceTree = SOURCE_ROOT; };
+		DA9E65DD0B0986710068BF4D /* Prefs.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Prefs.m; path = EVH/Prefs.m; sourceTree = SOURCE_ROOT; };
+		DA9E65DE0B0986710068BF4D /* Player.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Player.m; path = EVH/Player.m; sourceTree = SOURCE_ROOT; };
+		DA9E65DF0B0986710068BF4D /* Object3D.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Object3D.m; path = EVH/Object3D.m; sourceTree = SOURCE_ROOT; };
+		DA9E65E00B0986710068BF4D /* OBJ.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = OBJ.m; path = EVH/OBJ.m; sourceTree = SOURCE_ROOT; };
+		DA9E65E10B0986710068BF4D /* Cargo.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Cargo.m; path = EVH/Cargo.m; sourceTree = SOURCE_ROOT; };
+		DA9E65E20B0986710068BF4D /* MyWindow.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = MyWindow.m; path = EVH/MyWindow.m; sourceTree = SOURCE_ROOT; };
+		DA9E65E30B0986710068BF4D /* Mod.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Mod.m; path = EVH/Mod.m; sourceTree = SOURCE_ROOT; };
+		DA9E65E40B0986710068BF4D /* Mission.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Mission.m; path = EVH/Mission.m; sourceTree = SOURCE_ROOT; };
+		DA9E65E50B0986710068BF4D /* AI.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = AI.m; path = EVH/AI.m; sourceTree = SOURCE_ROOT; };
+		DA9E65E60B0986710068BF4D /* ControllerScripting.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = ControllerScripting.m; path = EVH/ControllerScripting.m; sourceTree = SOURCE_ROOT; };
+		DA9E65E70B0986710068BF4D /* ControllerMenu.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = ControllerMenu.m; path = EVH/ControllerMenu.m; sourceTree = SOURCE_ROOT; };
+		DA9E65E80B0986710068BF4D /* Asteroid.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Asteroid.m; path = EVH/Asteroid.m; sourceTree = SOURCE_ROOT; };
+		DA9E65E90B0986710068BF4D /* Board.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Board.m; path = EVH/Board.m; sourceTree = SOURCE_ROOT; };
+		DA9E65EA0B0986710068BF4D /* Console.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Console.m; path = EVH/Console.m; sourceTree = SOURCE_ROOT; };
+		DA9E65EB0B0986710068BF4D /* Background.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Background.m; path = EVH/Background.m; sourceTree = SOURCE_ROOT; };
+		DA9E65EC0B0986710068BF4D /* Interface.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Interface.m; path = EVH/Interface.m; sourceTree = SOURCE_ROOT; };
+		DA9E65ED0B0986710068BF4D /* Government.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Government.m; path = EVH/Government.m; sourceTree = SOURCE_ROOT; };
+		DA9E65EE0B0986710068BF4D /* Forklift.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Forklift.m; path = EVH/Forklift.m; sourceTree = SOURCE_ROOT; };
+		DA9E65EF0B0986710068BF4D /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Controller.m; path = EVH/Controller.m; sourceTree = SOURCE_ROOT; };
+		DA9E65F00B0986710068BF4D /* MerchantAI.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = MerchantAI.m; path = EVH/MerchantAI.m; sourceTree = SOURCE_ROOT; };
+		DA9E65F10B0986710068BF4D /* Map.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Map.m; path = EVH/Map.m; sourceTree = SOURCE_ROOT; };
+		DA9E65F20B0986710068BF4D /* Inventory.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Inventory.m; path = EVH/Inventory.m; sourceTree = SOURCE_ROOT; };
+		DA9E65F30B0986710068BF4D /* CutScene.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = CutScene.m; path = EVH/CutScene.m; sourceTree = SOURCE_ROOT; };
+		DA9E65F40B0986710068BF4D /* AggressorAI.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = AggressorAI.m; path = EVH/AggressorAI.m; sourceTree = SOURCE_ROOT; };
+		DA9E65F50B0986710068BF4D /* EHMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = EHMenuItem.m; path = EVH/EHMenuItem.m; sourceTree = SOURCE_ROOT; };
+		DA9E65F60B0986710068BF4D /* EHMenu.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = EHMenu.m; path = EVH/EHMenu.m; sourceTree = SOURCE_ROOT; };
+		DA9E65F70B0986710068BF4D /* ControllerGraphics.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = ControllerGraphics.m; path = EVH/ControllerGraphics.m; sourceTree = SOURCE_ROOT; };
+		DA9E65F80B0986710068BF4D /* EHButton.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = EHButton.m; path = EVH/EHButton.m; sourceTree = SOURCE_ROOT; };
+		DA9E65F90B0986710068BF4D /* Planet.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Planet.m; path = EVH/Planet.m; sourceTree = SOURCE_ROOT; };
+		DA9E65FA0B0986710068BF4D /* Coord.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Coord.m; path = EVH/Coord.m; sourceTree = SOURCE_ROOT; };
+		DA9E65FB0B0986710068BF4D /* ControllerThreading.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = ControllerThreading.m; path = EVH/ControllerThreading.m; sourceTree = SOURCE_ROOT; };
+		DA9E66270B0986830068BF4D /* Plugin.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Plugin.m; path = EVH/Plugin.m; sourceTree = SOURCE_ROOT; };
+		DA9E66300B0986D30068BF4D /* main.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = main.h; path = EVH/main.h; sourceTree = SOURCE_ROOT; };
+		DA9E66310B0986D30068BF4D /* KeyMapNames.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KeyMapNames.h; path = EVH/KeyMapNames.h; sourceTree = SOURCE_ROOT; };
+		DA9E66320B0987120068BF4D /* aglString.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = aglString.h; path = EVH/aglString.h; sourceTree = SOURCE_ROOT; };
+		DA9E66330B0987120068BF4D /* main.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = main.m; path = EVH/main.m; sourceTree = SOURCE_ROOT; };
+		DA9E66340B0987120068BF4D /* KeyMapNames.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = KeyMapNames.c; path = EVH/KeyMapNames.c; sourceTree = SOURCE_ROOT; };
+		DA9E66350B0987120068BF4D /* aglString.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = aglString.c; path = EVH/aglString.c; sourceTree = SOURCE_ROOT; };
+		DA9E66650B0987790068BF4D /* FScript.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FScript.framework; path = /Library/Frameworks/FScript.framework; sourceTree = "<absolute>"; };
+		DA9E66690B0987A70068BF4D /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = /System/Library/Frameworks/AGL.framework; sourceTree = "<absolute>"; };
+		DA9E666A0B0987A70068BF4D /* DrawSprocket.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DrawSprocket.framework; path = /System/Library/Frameworks/DrawSprocket.framework; sourceTree = "<absolute>"; };
+		DA9E666B0B0987A70068BF4D /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = /System/Library/Frameworks/OpenAL.framework; sourceTree = "<absolute>"; };
+		DA9E666C0B0987A70068BF4D /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
+		DA9E66790B0987CA0068BF4D /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		DAE062030B098CD700487FD7 /* Plugin.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Plugin.h; path = EVH/Plugin.h; sourceTree = SOURCE_ROOT; };
+		DAE062080B098CED00487FD7 /* Plugin.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Plugin.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAE062090B098CED00487FD7 /* Plugin-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Plugin-Info.plist"; sourceTree = "<group>"; };
+		DAEFF26C0B0C35E200A4C317 /* TabView2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = TabView2.png; path = Images/TabView2.png; sourceTree = "<group>"; };
+		DAEFF26D0B0C35E200A4C317 /* Button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Button.png; path = Images/Button.png; sourceTree = "<group>"; };
+		DAEFF26E0B0C35E200A4C317 /* ShieldSpot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ShieldSpot.png; path = Images/ShieldSpot.png; sourceTree = "<group>"; };
+		DAEFF26F0B0C35E200A4C317 /* Widgets.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Widgets.png; path = Images/Widgets.png; sourceTree = "<group>"; };
+		DAEFF2700B0C35E200A4C317 /* Asteroid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Asteroid.png; path = Images/Asteroid.png; sourceTree = "<group>"; };
+		DAEFF2710B0C35E200A4C317 /* Fire.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = Fire.jpg; path = Images/Fire.jpg; sourceTree = "<group>"; };
+		DAEFF2720B0C35E200A4C317 /* Split.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Split.png; path = Images/Split.png; sourceTree = "<group>"; };
+		DAEFF2730B0C35E200A4C317 /* Icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = Icon.icns; path = Images/Icon.icns; sourceTree = "<group>"; };
+		DAEFF2740B0C35E200A4C317 /* NavPlanet.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = NavPlanet.tiff; path = Images/NavPlanet.tiff; sourceTree = "<group>"; };
+		DAEFF2750B0C35E200A4C317 /* LogoLarge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = LogoLarge.png; path = Images/LogoLarge.png; sourceTree = "<group>"; };
+		DAEFF2760B0C35E200A4C317 /* Menu.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Menu.png; path = Images/Menu.png; sourceTree = "<group>"; };
+		DAEFF2770B0C35E200A4C317 /* TabView.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = TabView.png; path = Images/TabView.png; sourceTree = "<group>"; };
+		DAEFF2840B0C35F600A4C317 /* Explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = Explosion.wav; path = Sounds/Explosion.wav; sourceTree = "<group>"; };
+		DAEFF2850B0C35F600A4C317 /* intro.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = intro.mp3; path = Sounds/intro.mp3; sourceTree = "<group>"; };
+		DAEFF2860B0C35F600A4C317 /* Mission.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = Mission.mp3; path = Sounds/Mission.mp3; sourceTree = "<group>"; };
+		DAEFF2870B0C35F600A4C317 /* Mod.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = Mod.mp3; path = Sounds/Mod.mp3; sourceTree = "<group>"; };
+		DAEFF2880B0C35F600A4C317 /* Refuel.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = Refuel.mp3; path = Sounds/Refuel.mp3; sourceTree = "<group>"; };
+		DAEFF2890B0C35F600A4C317 /* Ship.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = Ship.mp3; path = Sounds/Ship.mp3; sourceTree = "<group>"; };
+		DAEFF28A0B0C35F600A4C317 /* Trade.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = Trade.mp3; path = Sounds/Trade.mp3; sourceTree = "<group>"; };
+		DAEFF29F0B0C36AA00A4C317 /* Forklift.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = Forklift.gif; path = Resources/Forklift.gif; sourceTree = "<group>"; };
+		DAEFF2A00B0C36AA00A4C317 /* Forklift.mtl */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Forklift.mtl; path = Resources/Forklift.mtl; sourceTree = "<group>"; };
+		DAEFF2A10B0C36AA00A4C317 /* Forklift.obj */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Forklift.obj; path = Resources/Forklift.obj; sourceTree = "<group>"; };
+		DAEFF2A20B0C36AA00A4C317 /* MainMenu.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = MainMenu.nib; path = Resources/MainMenu.nib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8D0C4E910486CD37000505A6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */,
+				DA9E66660B0987790068BF4D /* FScript.framework in Frameworks */,
+				DA9E666D0B0987A70068BF4D /* AGL.framework in Frameworks */,
+				DA9E666E0B0987A70068BF4D /* DrawSprocket.framework in Frameworks */,
+				DA9E666F0B0987A70068BF4D /* OpenAL.framework in Frameworks */,
+				DA9E66700B0987A70068BF4D /* OpenGL.framework in Frameworks */,
+				DA9E667A0B0987CA0068BF4D /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DAE062060B098CED00487FD7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DAE0620E0B098D0400487FD7 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		195DF8CFFE9D517E11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D0C4E970486CD37000505A6 /* Event Horizon.app */,
+				DAE062080B098CED00487FD7 /* Plugin.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		20286C29FDCF999611CA2CEA /* Intel */ = {
+			isa = PBXGroup;
+			children = (
+				DA9E659A0B09860F0068BF4D /* Plugin */,
+				DA9E65A00B09861A0068BF4D /* Headers */,
+				DA9E65A30B0986200068BF4D /* Classes */,
+				20286C2AFDCF999611CA2CEA /* Sources */,
+				20286C2CFDCF999611CA2CEA /* Resources */,
+				20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */,
+				195DF8CFFE9D517E11CA2CBB /* Products */,
+				DA083FB40E60A59A00F375DC /* Changes.txt */,
+				DAE062090B098CED00487FD7 /* Plugin-Info.plist */,
+			);
+			name = Intel;
+			sourceTree = "<group>";
+		};
+		20286C2AFDCF999611CA2CEA /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				DA9E66300B0986D30068BF4D /* main.h */,
+				DA9E66310B0986D30068BF4D /* KeyMapNames.h */,
+				DA9E66320B0987120068BF4D /* aglString.h */,
+				DA9E66330B0987120068BF4D /* main.m */,
+				DA9E66340B0987120068BF4D /* KeyMapNames.c */,
+				DA9E66350B0987120068BF4D /* aglString.c */,
+				32DBCF6D0370B57F00C91783 /* EVH_Prefix.pch */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		20286C2CFDCF999611CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				DAEFF26C0B0C35E200A4C317 /* TabView2.png */,
+				DAEFF26D0B0C35E200A4C317 /* Button.png */,
+				DAEFF26E0B0C35E200A4C317 /* ShieldSpot.png */,
+				DAEFF26F0B0C35E200A4C317 /* Widgets.png */,
+				DAEFF2700B0C35E200A4C317 /* Asteroid.png */,
+				DAEFF2710B0C35E200A4C317 /* Fire.jpg */,
+				DAEFF2720B0C35E200A4C317 /* Split.png */,
+				DAEFF2730B0C35E200A4C317 /* Icon.icns */,
+				DAEFF2740B0C35E200A4C317 /* NavPlanet.tiff */,
+				DAEFF2750B0C35E200A4C317 /* LogoLarge.png */,
+				DAEFF2760B0C35E200A4C317 /* Menu.png */,
+				DAEFF2770B0C35E200A4C317 /* TabView.png */,
+				DAEFF2840B0C35F600A4C317 /* Explosion.wav */,
+				DAEFF2850B0C35F600A4C317 /* intro.mp3 */,
+				DAEFF2860B0C35F600A4C317 /* Mission.mp3 */,
+				DAEFF2870B0C35F600A4C317 /* Mod.mp3 */,
+				DAEFF2880B0C35F600A4C317 /* Refuel.mp3 */,
+				DAEFF2890B0C35F600A4C317 /* Ship.mp3 */,
+				DAEFF28A0B0C35F600A4C317 /* Trade.mp3 */,
+				DAEFF29F0B0C36AA00A4C317 /* Forklift.gif */,
+				DAEFF2A00B0C36AA00A4C317 /* Forklift.mtl */,
+				DAEFF2A10B0C36AA00A4C317 /* Forklift.obj */,
+				DAEFF2A20B0C36AA00A4C317 /* MainMenu.nib */,
+				8D0C4E960486CD37000505A6 /* Info.plist */,
+				0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				DA9E66790B0987CA0068BF4D /* Cocoa.framework */,
+				DA9E66690B0987A70068BF4D /* AGL.framework */,
+				DA9E666A0B0987A70068BF4D /* DrawSprocket.framework */,
+				DA9E666B0B0987A70068BF4D /* OpenAL.framework */,
+				DA9E666C0B0987A70068BF4D /* OpenGL.framework */,
+				DA9E66650B0987790068BF4D /* FScript.framework */,
+				20286C33FDCF999611CA2CEA /* Carbon.framework */,
+				4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */,
+				4A9504C8FFE6A3BC11CA0CBA /* ApplicationServices.framework */,
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		DA9E659A0B09860F0068BF4D /* Plugin */ = {
+			isa = PBXGroup;
+			children = (
+				DA9E66270B0986830068BF4D /* Plugin.m */,
+				DAE062030B098CD700487FD7 /* Plugin.h */,
+			);
+			name = Plugin;
+			sourceTree = "<group>";
+		};
+		DA9E65A00B09861A0068BF4D /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				DA9E65A40B0986540068BF4D /* BackgroundMusic.h */,
+				DA9E65A50B0986540068BF4D /* WimpAI.h */,
+				DA9E65A60B0986540068BF4D /* Weapon.h */,
+				DA9E65A70B0986540068BF4D /* Type.h */,
+				DA9E65A80B0986540068BF4D /* Texture.h */,
+				DA9E65A90B0986540068BF4D /* StarDust.h */,
+				DA9E65AA0B0986540068BF4D /* Stack.h */,
+				DA9E65AB0B0986540068BF4D /* Spaceship.h */,
+				DA9E65AD0B0986540068BF4D /* SpaceObject.h */,
+				DA9E65AE0B0986540068BF4D /* SoundManager.h */,
+				DA9E65AF0B0986540068BF4D /* Solarsystem.h */,
+				DA9E65B00B0986540068BF4D /* ShieldSpot.h */,
+				DA9E65B10B0986540068BF4D /* Prefs.h */,
+				DA9E65B20B0986540068BF4D /* Player.h */,
+				DA9E65B30B0986540068BF4D /* Object3D.h */,
+				DA9E65B40B0986540068BF4D /* OBJ.h */,
+				DA9E65B50B0986540068BF4D /* MyWindow.h */,
+				DA9E65B60B0986540068BF4D /* ModProtocol.h */,
+				DA9E65B70B0986540068BF4D /* Mod.h */,
+				DA9E65B80B0986540068BF4D /* Mission.h */,
+				DA9E65B90B0986540068BF4D /* Cargo.h */,
+				DA9E65BA0B0986540068BF4D /* Controller.h */,
+				DA9E65BB0B0986540068BF4D /* ControllerScripting.h */,
+				DA9E65BC0B0986540068BF4D /* Console.h */,
+				DA9E65BD0B0986540068BF4D /* AI.h */,
+				DA9E65BE0B0986540068BF4D /* ControllerThreading.h */,
+				DA9E65BF0B0986540068BF4D /* Asteroid.h */,
+				DA9E65C00B0986540068BF4D /* EHMenu.h */,
+				DA9E65C10B0986540068BF4D /* Inventory.h */,
+				DA9E65C20B0986540068BF4D /* Interface.h */,
+				DA9E65C30B0986540068BF4D /* Government.h */,
+				DA9E65C40B0986540068BF4D /* Forklift.h */,
+				DA9E65C50B0986540068BF4D /* ControllerGraphics.h */,
+				DA9E65C60B0986540068BF4D /* Background.h */,
+				DA9E65C70B0986540068BF4D /* MerchantAI.h */,
+				DA9E65C80B0986540068BF4D /* Map.h */,
+				DA9E65C90B0986540068BF4D /* EHButton.h */,
+				DA9E65CA0B0986540068BF4D /* Board.h */,
+				DA9E65CB0B0986540068BF4D /* AggressorAI.h */,
+				DA9E65CC0B0986540068BF4D /* EHMenuItem.h */,
+				DA9E65CD0B0986540068BF4D /* ControllerMenu.h */,
+				DA9E65CE0B0986540068BF4D /* Planet.h */,
+				DA9E65CF0B0986540068BF4D /* CutScene.h */,
+				DA9E65D00B0986540068BF4D /* Coord.h */,
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
+		DA9E65A30B0986200068BF4D /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				DA9E65D90B0986710068BF4D /* SpaceObject.m */,
+				DA9E65EF0B0986710068BF4D /* Controller.m */,
+				DA9E65F70B0986710068BF4D /* ControllerGraphics.m */,
+				DA9E65FB0B0986710068BF4D /* ControllerThreading.m */,
+				DA9E65E70B0986710068BF4D /* ControllerMenu.m */,
+				DA9E65E60B0986710068BF4D /* ControllerScripting.m */,
+				DA9E65EB0B0986710068BF4D /* Background.m */,
+				DA9E65F10B0986710068BF4D /* Map.m */,
+				DA9E65DF0B0986710068BF4D /* Object3D.m */,
+				DA9E65E00B0986710068BF4D /* OBJ.m */,
+				DA9E65D80B0986710068BF4D /* Spaceship.m */,
+				DA9E65DB0B0986710068BF4D /* Solarsystem.m */,
+				DA9E65F90B0986710068BF4D /* Planet.m */,
+				DA9E65DE0B0986710068BF4D /* Player.m */,
+				DA9E65DD0B0986710068BF4D /* Prefs.m */,
+				DA9E65D30B0986710068BF4D /* Weapon.m */,
+				DA9E65D40B0986710068BF4D /* Type.m */,
+				DA9E65E50B0986710068BF4D /* AI.m */,
+				DA9E65D20B0986710068BF4D /* WimpAI.m */,
+				DA9E65F40B0986710068BF4D /* AggressorAI.m */,
+				DA9E65F00B0986710068BF4D /* MerchantAI.m */,
+				DA9E65D70B0986710068BF4D /* Stack.m */,
+				DA9E65E10B0986710068BF4D /* Cargo.m */,
+				DA9E65E30B0986710068BF4D /* Mod.m */,
+				DA9E65D10B0986710068BF4D /* BackgroundMusic.m */,
+				DA9E65D50B0986710068BF4D /* Texture.m */,
+				DA9E65D60B0986710068BF4D /* StarDust.m */,
+				DA9E65DA0B0986710068BF4D /* SoundManager.m */,
+				DA9E65DC0B0986710068BF4D /* ShieldSpot.m */,
+				DA9E65E20B0986710068BF4D /* MyWindow.m */,
+				DA9E65E40B0986710068BF4D /* Mission.m */,
+				DA9E65E80B0986710068BF4D /* Asteroid.m */,
+				DA9E65E90B0986710068BF4D /* Board.m */,
+				DA9E65EA0B0986710068BF4D /* Console.m */,
+				DA9E65EC0B0986710068BF4D /* Interface.m */,
+				DA9E65ED0B0986710068BF4D /* Government.m */,
+				DA9E65EE0B0986710068BF4D /* Forklift.m */,
+				DA9E65F20B0986710068BF4D /* Inventory.m */,
+				DA9E65F30B0986710068BF4D /* CutScene.m */,
+				DA9E65F50B0986710068BF4D /* EHMenuItem.m */,
+				DA9E65F60B0986710068BF4D /* EHMenu.m */,
+				DA9E65F80B0986710068BF4D /* EHButton.m */,
+				DA9E65FA0B0986710068BF4D /* Coord.m */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8D0C4E890486CD37000505A6 /* Event Horizon */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0E91AC508A95435008D54AB /* Build configuration list for PBXNativeTarget "Event Horizon" */;
+			buildPhases = (
+				8D0C4E8C0486CD37000505A6 /* Resources */,
+				8D0C4E8F0486CD37000505A6 /* Sources */,
+				8D0C4E910486CD37000505A6 /* Frameworks */,
+				4959B99F0CE0E1BF0004B92F /* Copy Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Event Horizon";
+			productInstallPath = "$(HOME)/Applications";
+			productName = Intel;
+			productReference = 8D0C4E970486CD37000505A6 /* Event Horizon.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DAE062070B098CED00487FD7 /* Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DAE0620A0B098CED00487FD7 /* Build configuration list for PBXNativeTarget "Plugin" */;
+			buildPhases = (
+				DAE062040B098CED00487FD7 /* Resources */,
+				DAE062050B098CED00487FD7 /* Sources */,
+				DAE062060B098CED00487FD7 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Plugin;
+			productName = Plugin;
+			productReference = DAE062080B098CED00487FD7 /* Plugin.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		20286C28FDCF999611CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "Event Horizon" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = 20286C29FDCF999611CA2CEA /* Intel */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8D0C4E890486CD37000505A6 /* Event Horizon */,
+				DAE062070B098CED00487FD7 /* Plugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8D0C4E8C0486CD37000505A6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */,
+				DAEFF2780B0C35E200A4C317 /* TabView2.png in Resources */,
+				DAEFF2790B0C35E200A4C317 /* Button.png in Resources */,
+				DAEFF27A0B0C35E200A4C317 /* ShieldSpot.png in Resources */,
+				DAEFF27B0B0C35E200A4C317 /* Widgets.png in Resources */,
+				DAEFF27C0B0C35E200A4C317 /* Asteroid.png in Resources */,
+				DAEFF27D0B0C35E200A4C317 /* Fire.jpg in Resources */,
+				DAEFF27E0B0C35E200A4C317 /* Split.png in Resources */,
+				DAEFF27F0B0C35E200A4C317 /* Icon.icns in Resources */,
+				DAEFF2800B0C35E200A4C317 /* NavPlanet.tiff in Resources */,
+				DAEFF2810B0C35E200A4C317 /* LogoLarge.png in Resources */,
+				DAEFF2820B0C35E200A4C317 /* Menu.png in Resources */,
+				DAEFF2830B0C35E200A4C317 /* TabView.png in Resources */,
+				DAEFF28B0B0C35F600A4C317 /* Explosion.wav in Resources */,
+				DAEFF28C0B0C35F600A4C317 /* intro.mp3 in Resources */,
+				DAEFF28D0B0C35F600A4C317 /* Mission.mp3 in Resources */,
+				DAEFF28E0B0C35F600A4C317 /* Mod.mp3 in Resources */,
+				DAEFF28F0B0C35F600A4C317 /* Refuel.mp3 in Resources */,
+				DAEFF2900B0C35F600A4C317 /* Ship.mp3 in Resources */,
+				DAEFF2910B0C35F600A4C317 /* Trade.mp3 in Resources */,
+				DAEFF2A70B0C36AA00A4C317 /* Forklift.gif in Resources */,
+				DAEFF2A80B0C36AA00A4C317 /* Forklift.mtl in Resources */,
+				DAEFF2A90B0C36AA00A4C317 /* Forklift.obj in Resources */,
+				DAEFF2AA0B0C36AA00A4C317 /* MainMenu.nib in Resources */,
+				DA083FB50E60A59A00F375DC /* Changes.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DAE062040B098CED00487FD7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8D0C4E8F0486CD37000505A6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA9E65FC0B0986710068BF4D /* BackgroundMusic.m in Sources */,
+				DA9E65FD0B0986710068BF4D /* WimpAI.m in Sources */,
+				DA9E65FE0B0986710068BF4D /* Weapon.m in Sources */,
+				DA9E65FF0B0986710068BF4D /* Type.m in Sources */,
+				DA9E66000B0986710068BF4D /* Texture.m in Sources */,
+				DA9E66010B0986710068BF4D /* StarDust.m in Sources */,
+				DA9E66020B0986710068BF4D /* Stack.m in Sources */,
+				DA9E66030B0986710068BF4D /* Spaceship.m in Sources */,
+				DA9E66040B0986710068BF4D /* SpaceObject.m in Sources */,
+				DA9E66050B0986710068BF4D /* SoundManager.m in Sources */,
+				DA9E66060B0986710068BF4D /* Solarsystem.m in Sources */,
+				DA9E66070B0986710068BF4D /* ShieldSpot.m in Sources */,
+				DA9E66080B0986710068BF4D /* Prefs.m in Sources */,
+				DA9E66090B0986710068BF4D /* Player.m in Sources */,
+				DA9E660A0B0986710068BF4D /* Object3D.m in Sources */,
+				DA9E660B0B0986710068BF4D /* OBJ.m in Sources */,
+				DA9E660C0B0986710068BF4D /* Cargo.m in Sources */,
+				DA9E660D0B0986710068BF4D /* MyWindow.m in Sources */,
+				DA9E660E0B0986710068BF4D /* Mod.m in Sources */,
+				DA9E660F0B0986710068BF4D /* Mission.m in Sources */,
+				DA9E66100B0986710068BF4D /* AI.m in Sources */,
+				DA9E66110B0986710068BF4D /* ControllerScripting.m in Sources */,
+				DA9E66120B0986710068BF4D /* ControllerMenu.m in Sources */,
+				DA9E66130B0986710068BF4D /* Asteroid.m in Sources */,
+				DA9E66140B0986710068BF4D /* Board.m in Sources */,
+				DA9E66150B0986710068BF4D /* Console.m in Sources */,
+				DA9E66160B0986710068BF4D /* Background.m in Sources */,
+				DA9E66170B0986710068BF4D /* Interface.m in Sources */,
+				DA9E66180B0986710068BF4D /* Government.m in Sources */,
+				DA9E66190B0986710068BF4D /* Forklift.m in Sources */,
+				DA9E661A0B0986710068BF4D /* Controller.m in Sources */,
+				DA9E661B0B0986710068BF4D /* MerchantAI.m in Sources */,
+				DA9E661C0B0986710068BF4D /* Map.m in Sources */,
+				DA9E661D0B0986710068BF4D /* Inventory.m in Sources */,
+				DA9E661E0B0986710068BF4D /* CutScene.m in Sources */,
+				DA9E661F0B0986710068BF4D /* AggressorAI.m in Sources */,
+				DA9E66200B0986710068BF4D /* EHMenuItem.m in Sources */,
+				DA9E66210B0986710068BF4D /* EHMenu.m in Sources */,
+				DA9E66220B0986710068BF4D /* ControllerGraphics.m in Sources */,
+				DA9E66230B0986710068BF4D /* EHButton.m in Sources */,
+				DA9E66240B0986710068BF4D /* Planet.m in Sources */,
+				DA9E66250B0986710068BF4D /* Coord.m in Sources */,
+				DA9E66260B0986710068BF4D /* ControllerThreading.m in Sources */,
+				DA9E66360B0987120068BF4D /* main.m in Sources */,
+				DA9E66370B0987120068BF4D /* KeyMapNames.c in Sources */,
+				DA9E66380B0987120068BF4D /* aglString.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DAE062050B098CED00487FD7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DAE0620D0B098CFC00487FD7 /* Plugin.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0867D6ABFE840B52C02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C0E91AC608A95435008D54AB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(inherited)";
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = "";
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = EVH_Prefix.pch;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				PRODUCT_NAME = "Event Horizon";
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		C0E91AC708A95435008D54AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(inherited)";
+				CURRENT_PROJECT_VERSION = 0.6.11;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = EVH_Prefix.pch;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_NAME = "Event Horizon";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		C0E91ACA08A95435008D54AB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH)";
+				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/;
+				GCC_MODEL_TUNING = G3;
+				GCC_VERSION = 4.0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.2;
+				PREBINDING = NO;
+				SDKROOT = macosx10.4;
+			};
+			name = Debug;
+		};
+		C0E91ACB08A95435008D54AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/;
+				GCC_VERSION = 4.0;
+				"GCC_VERSION[sdk=macosx*][arch=ppc]" = 3.3;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.2;
+				PREBINDING = NO;
+				SDKROOT = macosx10.4;
+			};
+			name = Release;
+		};
+		DAE0620B0B098CED00487FD7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Plugin-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Plugin;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		DAE0620C0B098CED00487FD7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Plugin-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Plugin;
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C0E91AC508A95435008D54AB /* Build configuration list for PBXNativeTarget "Event Horizon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0E91AC608A95435008D54AB /* Debug */,
+				C0E91AC708A95435008D54AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "Event Horizon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0E91ACA08A95435008D54AB /* Debug */,
+				C0E91ACB08A95435008D54AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DAE0620A0B098CED00487FD7 /* Build configuration list for PBXNativeTarget "Plugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DAE0620B0B098CED00487FD7 /* Debug */,
+				DAE0620C0B098CED00487FD7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 20286C28FDCF999611CA2CEA /* Project object */;
+}
