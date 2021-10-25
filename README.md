@@ -1,5 +1,5 @@
 # event-horizon
-Event Horizon is a 3D game similar to the classic Escape Velocity game from Ambrosia, but Event Horizon has a first-person view style. Basic game play is very similar: you fly around the galaxy in your spaceship, landing on planets to trade goods or get missions, and buy or sell spaceship addons or another spaceship.  
+[Event Horizon](https://eventhorizon.viscerallogic.com/) is a 3D game similar to the classic Escape Velocity game from Ambrosia, but Event Horizon has a first-person view style. Basic game play is very similar: you fly around the galaxy in your spaceship, landing on planets to trade goods or get missions, and buy or sell spaceship addons or another spaceship.  
 This code has not been tested beyond Mac OS X 10.4.
 
 Saturn with rings:  
