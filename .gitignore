@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Windows/x64/Debug
+/.vs/EventHorizon/copilot-chat/c90fa34b/sessions
+/.vs/EventHorizon/FileContentIndex
+/.vs/EventHorizon/v17/ipch/AutoPCH
+/.vs
+/x64/Debug
