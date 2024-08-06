@@ -8,3 +8,7 @@
 /.vs/EventHorizon/v17/ipch/AutoPCH
 /.vs
 /x64/Debug
+/vcpkg_installed
+/CMake/.vs
+/CMake/out/build/x64-debug
+/CMake/vcpkg_installed
