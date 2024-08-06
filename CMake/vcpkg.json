@@ -1,0 +1,19 @@
+{
+  "dependencies": [
+    {
+      "name": "glad",
+      "features": [
+        "gl-api-33"
+      ]
+    },
+    {
+      "name": "freetype-gl",
+      "features": [
+        "glad"
+      ]
+    },
+    "glm",
+    "sdl2",
+    "sdl2-image"
+  ]
+}
