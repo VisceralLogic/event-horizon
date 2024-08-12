@@ -94,3 +94,21 @@ void GLShaderProgram::setUniformMat4(const string& name, const float* value) {
 	}
 	glUniformMatrix4fv(location, 1, GL_FALSE, value);
 }
+
+void GLShaderProgram::setUniform3f(const string& name, float v0, float v1, float v2) {
+	GLint location = glGetUniformLocation(program, name.c_str());
+	if (location == -1) {
+		cerr << "Uniform " << name << " not found" << endl;
+		return;
+	}
+	glUniform3f(location, v0, v1, v2);
+}
+
+void GLShaderProgram::setUniform3fv(const string& name, const float* value) {
+	GLint location = glGetUniformLocation(program, name.c_str());
+	if (location == -1) {
+		cerr << "Uniform " << name << " not found" << endl;
+		return;
+	}
+	glUniform3fv(location, 1, value);
+}

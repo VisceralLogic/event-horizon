@@ -37,6 +37,7 @@ GLuint logoVBO, logoVAO, logoEBO, splitVAO, splitVBO, splitEBO;
 
 void beginPlayer() {
 	drawScene = drawPlayerScreen;
+	eventScene = eventPlayer;
 	Texture::loadTexture(Controller::basePath + "Images/LogoLarge.png", &playerTex, NULL, NULL);
 	Texture::loadTexture(Controller::basePath + "Images/Split.png", &splitLogoTex, NULL, NULL);
 	u = SDL_GetTicks64();
@@ -181,10 +182,8 @@ void drawPlayerScreen() {
 		glBindVertexArray(0);
 	}
 	if (pluginLoading != 0) {
-		glLoadIdentity();
-		glBindTexture(GL_TEXTURE_2D, 0);
-		glColor3f(0, 1, 0);
-		drawString("Loading...", (gScreenWidth / 2.0 - 128) / gScreenWidth, 250.0 / gScreenHeight);
+		float color[3] = { 0, 1, 0 };
+		Controller::drawString("Loading...", (gScreenWidth / 2.0 - 128) / gScreenWidth, 250.0 / gScreenHeight, color);
 		glColor3f(1, 0, 0);
 		glBegin(GL_LINE_STRIP);
 		glVertex2i(gScreenWidth / 2 - 129, 199);
@@ -215,25 +214,33 @@ void drawPlayerScreen() {
 		if (selectPlayer) {		// draw selection screen
 			int i;
 
-			glBindTexture(GL_TEXTURE_2D, 0);
 			for (i = 0; i < numPlayers; i++) {
 				if (playerIndex == i + 1) {
-					glColor3f(.5 + .5 * sin(6 * t), 1, 0);
-					drawString(">", (gScreenWidth / 2.0 - 196) / gScreenWidth, (gScreenHeight - 278 - 40 * (i + 1.0)) / gScreenHeight);
+					float color[3] = { .5 + .5 * sin(6 * t), 1, 0 };
+					Controller::drawString(">", (gScreenWidth / 2.0 - 196) / gScreenWidth, (gScreenHeight - 278 - 40 * (i + 1.0)) / gScreenHeight, color);
 				}
 			}
 		}
 		else {	// creating new player
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glColor3f(1, 1, 0);
-			drawString("Enter your name:", (gScreenWidth / 2.0 - 200) / gScreenWidth, (gScreenHeight - 288.0) / gScreenHeight);
-			glColor3f(0, 1, 0);
-			drawString(name, (gScreenWidth / 2.0 - 76) / gScreenWidth, (gScreenHeight - 288.0) / gScreenHeight);
+			float color[3] = { 1, 1, 0 };
+			Controller::drawString("Enter your name:", (gScreenWidth / 2.0 - 200) / gScreenWidth, (gScreenHeight - 288.0) / gScreenHeight, color);
+			color[0] = 0;
+			Controller::drawString(name, (gScreenWidth / 2.0 - 76) / gScreenWidth, (gScreenHeight - 288.0) / gScreenHeight, color);
 
 			// TO DO: get raster pos, if too long, stop entry
 			/*if (sin(8 * t) > 0.5)
 				DrawCStringGL("|", font);*/
 		}
+	}
+}
+
+void eventPlayer(SDL_Event &event) {
+	if (event.type == SDL_MOUSEBUTTONDOWN ){
+		if( t < 10 )
+			t = 10;
+	}
+	else if (event.type == SDL_MOUSEMOTION) {
+
 	}
 }
 

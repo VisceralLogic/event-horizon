@@ -201,66 +201,47 @@ EHButton* EHButton::newButton(const string& text, int x, int y, int width, void 
 	return button;
 }
 
-void EHButton::handleEvent() {
-/*
-	UInt32 kind = GetEventKind(event);
-
-	if( ![buttons count] )
-		return;
-
-	switch( GetEventClass(event) ){
-		case kEventClassMouse:
-			if( kind == kEventMouseDown ){
-				UInt16 button;
-				Point p;
-				GetEventParameter( event, kEventParamMouseButton, typeMouseButton, NULL, sizeof(UInt16), NULL, &button );
-				GetEventParameter( event, kEventParamMouseLocation, typeQDPoint, NULL, sizeof(Point), NULL, &p );
-				p.v = gScreenHeight-p.v;
-				if( button == kEventMouseButtonPrimary ){
-					int i;
-					for( i = 0; i < [buttons count]; i++ ){
-						EHButton *b = [buttons objectAtIndex:i];
-						if( [b inBoundsX:p.h y:p.v] ){
-							b->pressed = YES;
-							b->mouseIn = YES;
-							mouseButton = b;
-							break;
-						}
-					}
-				}
-			} else if( kind == kEventMouseUp ){
-				UInt16 button;
-				Point p;
-				GetEventParameter( event, kEventParamMouseButton, typeMouseButton, NULL, sizeof(UInt16), NULL, &button );
-				GetEventParameter( event, kEventParamMouseLocation, typeQDPoint, NULL, sizeof(Point), NULL, &p );
-				p.v = gScreenHeight-p.v;
-				if( button == kEventMouseButtonPrimary && mouseButton ){
-					if( [mouseButton inBoundsX:p.h y:p.v] ){
-						if( mouseButton->pressed )
-							mouseButton->clicked = YES;
-					} else {
-						mouseButton->pressed = NO;
-					}
-					mouseButton = nil;
-				}
-			} else if( kind == kEventMouseMoved || kind == kEventMouseDragged ){
-				Point p;
-				int i;
-				GetEventParameter( event, kEventParamMouseLocation, typeQDPoint, NULL, sizeof(Point), NULL, &p );
-				p.v = gScreenHeight-p.v;
-				for( i = 0; i < [buttons count]; i++ ){
-					EHButton *b = [buttons objectAtIndex:i];
-					if( [b inBoundsX:p.h y:p.v] )
-						b->mouseIn = YES;
-					else
-						b->mouseIn = NO;
-				}
-			}
-			break;
-		default:
-			break;
+void EHButton::handleEvent(SDL_Event &event) {
+	if (event.type == SDL_MOUSEMOTION) {
+				int x, y;
+		SDL_GetMouseState(&x, &y);
+		y = gScreenHeight - y;
+		for( EHButton *b : buttons ){
+			if( b->inBounds(x, y) )
+				b->_mouseIn = true;
+			else
+				b->_mouseIn = false;
+		}
 	}
-*/
+	else if (event.type == SDL_MOUSEBUTTONDOWN) {
+		int x, y;
+		SDL_GetMouseState(&x, &y);
+		y = gScreenHeight - y;
+		// check if left button
+		if( event.button.button != SDL_BUTTON_LEFT )
+			return;
+		for( EHButton *b : buttons ){
+			if( b->inBounds(x, y) ){
+				b->_pressed = true;
+				mouseButton = b;
+				break;
+			}
+		}
+	}
+	else if (event.type == SDL_MOUSEBUTTONUP) {
+		int x, y;
+		SDL_GetMouseState(&x, &y);
+		y = gScreenHeight - y;
+		if( mouseButton && event.button.button == SDL_BUTTON_LEFT ) {
+			if (mouseButton->inBounds(x, y)) {
+				mouseButton->_clicked = true;
+			}
+			else {
+				mouseButton->_pressed = false;
+			}
+			mouseButton = NULL;
+		}
+	}
 }
 
 void EHButton::draw() {
@@ -271,16 +252,16 @@ void EHButton::draw() {
 
 	if (active) {
 		if (_pressed && _mouseIn)
-			delta = -.5;
-		else if (_mouseIn)
 			delta = -.25;
+		else if (_mouseIn)
+			delta = -.5;
 		else
-			delta = 0;
+			delta = -.75;
 	}
 	else
-		delta = -.75;
+		delta = 0;
 
-	//glDisable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
 
 	shader->use();
 	glBindTexture(GL_TEXTURE_2D, buttonTex);
@@ -300,19 +281,25 @@ void EHButton::draw() {
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 
-	/*if (active) {
+	float* color;
+	float pressedAndMouse[3] = {0.75, 0.88, 1};
+	float mouseIn[3] = {0, 1, 1};
+	float mouseOut[3] = { 0, 1, 0 };
+	float inactive[3] = { .2, .3, .3 };
+	if (active) {
 		if (_pressed && _mouseIn)
-			glColor3f(.75, .88, 1);
+			color = pressedAndMouse;
 		else if (_mouseIn)
-			glColor3f(0, 1, 1);
+			color = mouseIn;
 		else
-			glColor3f(0, 1, 0);
+			color = mouseOut;
 	}
 	else
-		glColor3f(.2, .3, .3);
-	drawString(text, (x+20.0)/gScreenWidth, (y+9.0)/gScreenHeight);*/
+		color = inactive;
 
-	//glEnable(GL_DEPTH_TEST);
+	Controller::drawString(text, x+20.0, y+9.0, color);
+
+	glEnable(GL_DEPTH_TEST);
 
 	if (_pressed && _clicked) {   // fresh click
 		_pressed = false;

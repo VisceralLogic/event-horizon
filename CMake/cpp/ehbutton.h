@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <SDL2/SDL.h>
 
 using namespace std;
 
@@ -18,7 +19,7 @@ public:
 	int (*isActive)(void);
 
 	static void initialize();
-	static void handleEvent();
+	static void handleEvent(SDL_Event &event);
 	static EHButton* newButton(const string& text, int x, int y, int width, void (*call)(void), void (*callParam)(const string& param), int active, int (*isActive)(void));
 	static void update();
 	static void clear();

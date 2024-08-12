@@ -1,12 +1,14 @@
 #pragma once	
 
 #include <set>
+#include <SDL2/SDL.h>
 
 #include "spaceobject.h"
 #include "planet.h"
 #include "solarsystem.h"
 #include "spaceship.h"
 #include "asteroid.h"
+#include "shader.h"
 //#import "Background.h"
 
 class Mission;
@@ -68,6 +70,9 @@ enum {					// pref float values
 };
 
 class Controller : public Spaceship {
+protected:
+	static GLShaderProgram* stringShader;
+
 public:
 	vector<Planet*> planets;
 	Solarsystem* system;
@@ -138,6 +143,8 @@ public:
 	void drawFrame();
 	void drawSelectionTab(int pos);
 	void drawInfoTab();
+
+	static void drawString(const string& str, float x, float y, float *color);
 };
 
 void drawGLScene();
@@ -145,6 +152,7 @@ void beginOrtho();
 void endOrtho();
 void drawString(string str, float x, float y);
 extern void (*drawScene)(void);
+extern void (*eventScene)(SDL_Event&);
 extern int gScreenWidth;
 extern int gScreenHeight;
 extern GLuint defaultFrameList;

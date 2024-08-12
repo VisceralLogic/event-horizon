@@ -40,11 +40,11 @@ bool setup() {
     }
 
     SDL_GetDisplayBounds(0, &displayBounds);
-    gScreenWidth = 1280;// displayBounds.w;
-    gScreenHeight = 800;// displayBounds.h;
+    gScreenWidth = displayBounds.w;
+    gScreenHeight = displayBounds.h;
 
     // Create a window
-    window = SDL_CreateWindow("Event Horizon", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gScreenWidth, gScreenHeight, /*SDL_WINDOW_FULLSCREEN_DESKTOP |*/ SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("Event Horizon", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gScreenWidth, gScreenHeight, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL);
     if (!window)
     {
         SDL_Log("Unable to create window: %s", SDL_GetError());
@@ -119,13 +119,15 @@ void eventLoop() {
 		}
 
         SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type == SDL_QUIT)
-            {
-                running = false;
-            }
-        }
+        while(SDL_PollEvent(&event)){
+			if (event.type == SDL_QUIT){
+				running = false;
+			}
+			if( eventScene != NULL ){
+				eventScene(event);
+			}
+            EHButton::handleEvent(event);
+		}
 
         doUpdate();
     }

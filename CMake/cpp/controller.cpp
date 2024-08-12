@@ -1,10 +1,13 @@
 #include <SDL2/SDL.h>
 #include <fstream>
+#include <iostream>
 #include <SDL_filesystem.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <freetype-gl/freetype-gl.h>
 #include <freetype-gl/vertex-buffer.h>
 #include <freetype-gl/vertex-attribute.h>
+
 #include "shader.h"
 
 #include "controller.h"
@@ -13,8 +16,9 @@
 #define sqr(x) ((x)*(x))
 
 void (*drawScene)(void);
+void (*eventScene)(SDL_Event&);
 
-void add_text(vertex_buffer_t* buffer, texture_font_t* font, const char* text, vec4* color, vec2* pen);
+void add_text(GLfloat* vertices, GLuint* indices, texture_font_t* font, const string& str, float x, float y);
 
 extern const Uint8* keyMap;
 extern Uint8* oldKeys;
@@ -33,49 +37,52 @@ int filesDone = 0;
 
 bool debug = false;
 
-texture_atlas_t* atlas = texture_atlas_new(512, 512, 1);
+texture_atlas_t* atlas;
 texture_font_t* font;
 
-string vert_source = "/* Freetype GL - A C OpenGL Freetype engine\
-*\
-*Distributed under the OSI - approved BSD 2 - Clause License.See accompanying\
-* file `LICENSE` for more details.\
-*/\
-uniform mat4 model;\
-uniform mat4 view;\
-uniform mat4 projection;\
-\
-attribute vec3 vertex;\
-attribute vec2 tex_coord;\
-attribute vec4 color;\
-void main()\
-{\
-	gl_TexCoord[0].xy = tex_coord.xy;\
-	gl_FrontColor = color;\
-	gl_Position = projection * (view * (model * vec4(vertex, 1.0)));\
-}";
-string frag_source = "/* Freetype GL - A C OpenGL Freetype engine\
-*\
-*Distributed under the OSI - approved BSD 2 - Clause License.See accompanying\
-* file `LICENSE` for more details.\
-*/\
-uniform sampler2D texture;\
-void main()\
-{\
-	float a = texture2D(texture, gl_TexCoord[0].xy).r;\
-	gl_FragColor = vec4(gl_Color.rgb, gl_Color.a * a);\
-}";
+string vert_source = "#version 330 core\n"
+"layout(location = 0) in vec3 vertex;\n"
+"layout(location = 1) in vec2 tex_coord;\n"
+"uniform mat4 projection;\n"
+"out vec2 TexCoords;\n"
+"void main() {\n"
+"	TexCoords = tex_coord;\n"
+"	gl_Position = projection * vec4(vertex, 1.0);\n"
+"	TexCoords = tex_coord;\n"
+"}\n";
 
-GLuint shader;
+string frag_source = "#version 330 core\n"
+"out vec4 color;\n"
+"uniform sampler2D text;\n"
+"uniform vec3 textColor;\n"
+"in vec2 TexCoords;\n"
+"void main() {\n"
+"	vec4 sample = texture(text, TexCoords);\n"
+"	color = vec4(textColor, sample.r);\n"
+"}\n";
 
 string Controller::basePath;
+GLShaderProgram* Controller::stringShader;
 
 void Controller::initialize() {
-	//shader = load_shader(vert_source.c_str(), frag_source.c_str());
+	stringShader = new GLShaderProgram(vert_source, frag_source);
 	char *temp = SDL_GetBasePath();
 	basePath = temp;
 	SDL_free(temp);
-	font = texture_font_new_from_file(atlas, 24, (Controller::basePath + "Resources/ChicagoFLF.ttf").c_str());
+	atlas = texture_atlas_new(128, 128, 1);
+	font = texture_font_new_from_file(atlas, 16, (Controller::basePath + "Resources/ChicagoFLF.ttf").c_str());
+	char* str = new char[97];
+	for( int i = 0; i < 96; i++ )
+		str[i] = i + 32;
+	str[96] = 0;
+	texture_font_load_glyphs(font, str);
+	glGenTextures(1, &atlas->id);
+	glBindTexture(GL_TEXTURE_2D, atlas->id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlas->width, atlas->height, 0, GL_RED, GL_UNSIGNED_BYTE, atlas->data);
 }
 
 Controller::Controller(string name, bool isNew) {
@@ -847,92 +854,82 @@ void Controller::setUpFrame() {
 	}
 }
 
-void drawString(string str, float x, float y) {
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0, gScreenWidth, 0, gScreenHeight, 0, 1);
-	glMatrixMode(GL_MODELVIEW);
-
-	glRasterPos2f(gScreenWidth * x, gScreenHeight * y);
-	vertex_buffer_t* buffer = vertex_buffer_new("vertex:3f,tex_coord:2f,color:4f");
-	texture_font_load_glyphs(font, str.c_str());
-	vec4 color = { {1, 1, 1, 1} }; // RGBA white
-	vec2 pen = { {x*gScreenWidth, y*gScreenHeight} }; // Starting position
-	add_text(buffer, font, str.c_str(), &color, &pen);
-
+void Controller::drawString(const string& str, float x, float y, float *color) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glClearColor(1, 1, 1, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	stringShader->use();
+	stringShader->setUniformMat4("projection", glm::value_ptr(GLShaderProgram::orthoTransform));
+	stringShader->setUniform3fv("textColor", color);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLfloat *vertices = new GLfloat[20 * str.size()];
+	GLuint *indices = new GLuint[6 * str.size()];
+
+	add_text(vertices, indices, font, str, x, y);
+
+	GLuint VAO, VBO, EBO;
+
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*20*str.size(), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*6*str.size(), indices, GL_STATIC_DRAW);
 
 	glBindTexture(GL_TEXTURE_2D, atlas->id);
 
-	glUseProgram(shader);
-	{
-		glUniform1i(glGetUniformLocation(shader, "texture"),
-			0);
-		//glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
-		//	1, 0, model.data);
-		//glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
-		//	1, 0, view.data);
-		//glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
-		//	1, 0, projection.data);
-		vertex_buffer_render(buffer, GL_TRIANGLES);
-	}
+	glDrawElements(GL_TRIANGLES, 6*str.length(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 
-	vertex_buffer_delete(buffer);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glDeleteVertexArrays(1, &VAO);
 
-	glDisable(GL_BLEND);
-
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
+	delete[] vertices;
+	delete[] indices;
 }
 
-// ------------------------------------------------------- typedef & struct ---
-typedef struct {
-	float x, y, z;    // position
-	float s, t;       // texture
-	float r, g, b, a; // color
-} vertex_t;
-
-// --------------------------------------------------------------- add_text ---
-void add_text(vertex_buffer_t* buffer, texture_font_t* font,
-	const char* text, vec4* color, vec2* pen)
-{
-	size_t i;
-	float r = color->red, g = color->green, b = color->blue, a = color->alpha;
-	for (i = 0; i < strlen(text); ++i)
-	{
+void add_text(GLfloat* vertices, GLuint* indices, texture_font_t* font, const string& str, float x, float y) {
+	float r = 1.0f, g = 1.0f, b = 1.0f, a = 1.0f;
+	float penX = x, penY = y;
+	const char* text = str.c_str();
+	for (int i = 0; i < str.length(); i++) {
+		int vOffset = i * 20;
+		int iOffset = i * 6;
 		texture_glyph_t* glyph = texture_font_get_glyph(font, text + i);
-		if (glyph != NULL)
-		{
+		if (glyph != nullptr) {
 			float kerning = 0.0f;
-			if (i > 0)
-			{
+			if (i > 0) {
 				kerning = texture_glyph_get_kerning(glyph, text + i - 1);
 			}
-			pen->x += kerning;
-			int x0 = (int)(pen->x + glyph->offset_x);
-			int y0 = (int)(pen->y + glyph->offset_y);
-			int x1 = (int)(x0 + glyph->width);
-			int y1 = (int)(y0 - glyph->height);
+			penX += kerning;
+			float x0 = penX + glyph->offset_x;
+			float y0 = penY + glyph->offset_y;
+			float x1 = x0 + glyph->width;
+			float y1 = y0 - glyph->height;
 			float s0 = glyph->s0;
 			float t0 = glyph->t0;
 			float s1 = glyph->s1;
 			float t1 = glyph->t1;
-			GLuint indices[6] = { 0,1,2, 0,2,3 };
-			vertex_t vertices[4] = { { x0,y0,0,  s0,t0,  r,g,b,a },
-									 { x0,y1,0,  s0,t1,  r,g,b,a },
-									 { x1,y1,0,  s1,t1,  r,g,b,a },
-									 { x1,y0,0,  s1,t0,  r,g,b,a } };
-			vertex_buffer_push_back(buffer, vertices, 4, indices, 6);
-			pen->x += glyph->advance_x;
+			GLuint indicesCur[6] = { i*4, i*4+1, i*4+2, i*4, i*4+2, i*4+3 };
+			GLfloat verticesCur[4 * 5] = {
+				x0, y0, 0, s0, t0,
+				x0, y1, 0, s0, t1,
+				x1, y1, 0, s1, t1,
+				x1, y0, 0, s1, t0
+			};
+			memcpy(vertices + vOffset, verticesCur, 4 * 5 * sizeof(GLfloat));
+			memcpy(indices + iOffset, indicesCur, 6 * sizeof(GLuint));
+			penX += glyph->advance_x;
 		}
 	}
 }
