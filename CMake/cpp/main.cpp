@@ -11,6 +11,7 @@
 #include "ehbutton.h"
 #include "player.h"
 #include "shader.h"
+#include "planet.h"
 
 SDL_Window* window;
 SDL_GLContext context;
@@ -40,11 +41,11 @@ bool setup() {
     }
 
     SDL_GetDisplayBounds(0, &displayBounds);
-    gScreenWidth = displayBounds.w;
-    gScreenHeight = displayBounds.h;
+    gScreenWidth = 1280;// displayBounds.w;
+    gScreenHeight = 800;// displayBounds.h;
 
     // Create a window
-    window = SDL_CreateWindow("Event Horizon", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gScreenWidth, gScreenHeight, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("Event Horizon", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gScreenWidth, gScreenHeight, /*SDL_WINDOW_FULLSCREEN_DESKTOP |*/ SDL_WINDOW_OPENGL);
     if (!window)
     {
         SDL_Log("Unable to create window: %s", SDL_GetError());
@@ -79,7 +80,7 @@ bool setup() {
     Controller::initialize();
     GLShaderProgram::initialize();
     EHButton::initialize();
-
+    Planet::initialize();
 
     beginPlayer();
 

@@ -8,10 +8,12 @@ using namespace std;
 extern int gScreenWidth, gScreenHeight;
 
 glm::mat4 GLShaderProgram::orthoTransform;
+glm::mat4 GLShaderProgram::perspective;
 
 void GLShaderProgram::initialize() {
 	orthoTransform = glm::scale(glm::mat4(1.0f), glm::vec3(2.0f / gScreenWidth, 2.0f / gScreenHeight, 1.0f));
 	orthoTransform = glm::translate(orthoTransform, glm::vec3(-gScreenWidth / 2, -gScreenHeight / 2, 0.0f));
+	perspective = glm::perspective(glm::radians(45.0f), (float)gScreenWidth / (float)gScreenHeight, 0.01f, 500.0f);
 }
 
 GLShaderProgram::GLShaderProgram(const string& vertexShader, const string& fragmentShader) {

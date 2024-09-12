@@ -1,16 +1,25 @@
 #pragma once
+
+#include <memory>
+#include <nlohmann/json.hpp>
+#include <SDL2/SDL.h>
+
 #include "spaceobject.h"
 #include "object3D.h"
+#include "ehobject.h"
+#include "sphere.h"
 
-class Planet : public SpaceObject {
+class Solarsystem;
+
+class Planet : public SpaceObject, public EHObject {
 public:
 	//NSMutableArray* goods;			// goods sold here
 	bool shipyard, mod, mission;	// available amenities
-	vector<string> shipFlags;			// flags required for this ship to show up
-	vector<string> modFlags;				// ...
-	vector<string> missionFlags;			// ...
-	string texFile;				// texture file for dynamic loading
-	Object3D* model;				// used for a space station
+	string shipFlags;				// flags required for this ship to show up
+	string modFlags;				// ...
+	string missionFlags;			// ...
+	string texFile;					// texture file for dynamic loading
+	shared_ptr<Object3D> model;				// used for a space station
 	float inclination;				// orbital inclination from ecliptic
 	string ringTex;				// path to optional ring texture file
 	float ringSize;					// radius of ring
@@ -19,4 +28,18 @@ public:
 	float atmosSpeed;				// rotation of atmosphere (relative)
 	float atmosRot;					// current relative angle of atmosphere
 	float atmosAmbient[4];			// atmosphere ambient light
+	shared_ptr<Solarsystem> system;			// which system this planet belongs to
+
+	static Sphere* planetSphere;
+
+	Planet();
+	~Planet();
+
+	static void initialize();
+	static void registerFromDictionary(const json& dictionary);
+	void finalize();
+
+	static void setUpPlanet();
+	static void drawPlanet();
+	static void handleEvent(SDL_Event& event);
 };

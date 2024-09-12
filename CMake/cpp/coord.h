@@ -7,7 +7,7 @@ public:
 
 	Coord();
 	Coord(double x, double y, double z, double u, double v);
-	Coord(Coord &coord);
+	Coord(const Coord &coord);
 
 	void makeOBJTex();
 	void makeTexCoord();

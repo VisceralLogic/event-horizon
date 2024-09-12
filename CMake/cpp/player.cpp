@@ -148,7 +148,7 @@ void endPlayer(bool newPlayer) {
 	//if (sys->floatVal[MOUSE] == 1.0f)
 	//	CGAssociateMouseAndMouseCursorPosition(NO);
 	drawScene = drawGLScene;
-	//eventScene = NULL;
+	eventScene = NULL;
 
 	delete logoShader;
 	glDeleteTextures(1, &playerTex);
@@ -217,19 +217,16 @@ void drawPlayerScreen() {
 			for (i = 0; i < numPlayers; i++) {
 				if (playerIndex == i + 1) {
 					float color[3] = { .5 + .5 * sin(6 * t), 1, 0 };
-					Controller::drawString(">", (gScreenWidth / 2.0 - 196) / gScreenWidth, (gScreenHeight - 278 - 40 * (i + 1.0)) / gScreenHeight, color);
+					Controller::drawString(">", gScreenWidth / 2.0 - 196, gScreenHeight - 278 - 40 * (i + 1.0), color);
 				}
 			}
 		}
 		else {	// creating new player
 			float color[3] = { 1, 1, 0 };
-			Controller::drawString("Enter your name:", (gScreenWidth / 2.0 - 200) / gScreenWidth, (gScreenHeight - 288.0) / gScreenHeight, color);
+			Controller::drawString("Enter your name:", gScreenWidth / 2.0 - 200, gScreenHeight - 288.0, color);
 			color[0] = 0;
-			Controller::drawString(name, (gScreenWidth / 2.0 - 76) / gScreenWidth, (gScreenHeight - 288.0) / gScreenHeight, color);
-
-			// TO DO: get raster pos, if too long, stop entry
-			/*if (sin(8 * t) > 0.5)
-				DrawCStringGL("|", font);*/
+			string text = sin(8*t) > 0.5 ? name + "|" : name;
+			Controller::drawString(text, gScreenWidth / 2.0 - 48, gScreenHeight - 288.0, color);
 		}
 	}
 }
@@ -241,6 +238,108 @@ void eventPlayer(SDL_Event &event) {
 	}
 	else if (event.type == SDL_MOUSEMOTION) {
 
+	}
+	else if (event.type == SDL_KEYDOWN) {
+		if (t < 10) {
+			t = 10;
+			return;
+		}
+		// get event ascii code
+		SDL_Keycode c = event.key.keysym.sym;
+		if (c == SDLK_ESCAPE) {
+			if (selectPlayer)
+				exit(0);
+			else {
+				selectPlayer = true;
+				EHButton::clear();
+				EHButton::recallSet("Player");
+				name = "";
+			}
+		}
+		else if (c == SDLK_RETURN || c == SDLK_KP_ENTER) {
+			playerEnter();
+		}
+		else if (!selectPlayer) {
+			if (c == SDLK_BACKSPACE) {
+				if (name.size() > 0)
+					name.pop_back();
+			}
+			else if (c >= 32 && c <= 126) {
+				// get modifier keys
+				if (event.key.keysym.mod & KMOD_SHIFT) {
+					if( c >= 97 && c <= 122)
+						c -= 32;
+					else {
+						switch (c) {
+						case '`':
+							c = '~';
+							break;
+						case '1':
+							c = '!';
+							break;
+						case '2':
+							c = '@';
+							break;
+						case '3':
+							c = '#';
+							break;
+						case '4':
+							c = '$';
+							break;
+						case '5':
+							c = '%';
+							break;
+						case '6':
+							c = '^';
+							break;
+						case '7':
+							c = '&';
+							break;
+						case '8':
+							c = '*';
+							break;
+						case '9':
+							c = '(';
+							break;
+						case '0':
+							c = ')';
+							break;
+						case '-':
+							c = '_';
+							break;
+						case '=':
+							c = '+';
+							break;
+						case '[':
+							c = '{';
+							break;
+						case ']':
+							c = '}';
+							break;
+						case '\\':
+							c = '|';
+							break;
+						case ';':
+							c = ':';
+							break;
+						case '\'':
+							c = '"';
+							break;
+						case ',':
+							c = '<';
+							break;
+						case '.':
+							c = '>';
+							break;
+						case '/':
+							c = '?';
+							break;
+						}
+					}
+				}
+				name += c;
+			}
+		}
 	}
 }
 
@@ -258,13 +357,24 @@ void playerDelete() {
 
 }
 
+void playerCancel() {
+	if (selectPlayer) {
+		exit(0);
+	}
+	else {
+		selectPlayer = true;
+		EHButton::clear();
+		EHButton::recallSet("Player");
+	}
+}
+
 void playerEnter() {
 	if (selectPlayer) {
 		if (playerIndex > 0)
 			endPlayer(false);
 	}
 	else {
-		if (name.size() > 0)
+		if (name.size() <= 0)
 			return;
 		endPlayer(true);
 		//setUpPrefs();
@@ -276,5 +386,10 @@ void playerQuit() {
 }
 
 void playerNew() {
-
+	EHButton::storeSet("Player");
+	EHButton::clear();
+	EHButton::newButton("Enter", gScreenWidth - 164, 50, 128, playerEnter, NULL, false, validPlayer);
+	EHButton::newButton("Cancel", gScreenWidth - 528, 50, 128, playerCancel, NULL, true, NULL);
+	selectPlayer = false;
+	name = "";
 }

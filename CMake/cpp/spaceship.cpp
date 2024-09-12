@@ -1,5 +1,10 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 #include "spaceship.h"
 #include "controller.h"
+#include "plugin.h"
 
 #define sqr(x) ((x)*(x))
 
@@ -19,6 +24,93 @@ Spaceship::~Spaceship() {
 	//[escorts release] ;
 
 	//[super dealloc] ;
+}
+
+void Spaceship::registerFromDictionary(const json& dictionary) {
+	shared_ptr<Spaceship> ship = make_shared<Spaceship>();
+	json empty;
+	if (!dictionary.contains("Data"))
+		return;
+	string dataFile = dictionary["Data"];
+	if (dataFile.ends_with("obj") || dataFile.ends_with("OBJ")) {
+		ship->loadOBJ((string)dictionary["Directory"] + dataFile);
+	}
+	else {
+		ifstream fileStream(dataFile);
+		if (!fileStream.is_open()) {
+			//throw std::runtime_error("Could not open file: " + dataFile);
+			return;
+		}
+		stringstream buffer;
+		buffer << fileStream.rdbuf();
+		ship->load(buffer.str().c_str(), (string)dictionary["Directory"] + (string)dictionary["PicturePath"]);
+	}
+	ship->name = dictionary.contains("Name") ? dictionary["Name"] : dictionary["ID"];
+	ship->ID = (string)dictionary["PluginName"] + ".ships." + (string)dictionary["ID"];
+	ship->ANGULAR_ACCELERATION = dictionary.contains("AngularAcceleration") ? (double)dictionary["AngularAcceleration"] : 25;
+	ship->MAX_ANGULAR_VELOCITY = dictionary.contains("MaxAngularVelocity") ? (double)dictionary["MaxAngularVelocity"] : 60;
+	ship->thrust = dictionary.contains("Thrust") ? (float)dictionary["Thrust"] : 250;
+	ship->MAX_VELOCITY = dictionary.contains("MaxSpeed") ? (double)dictionary["MaxSpeed"] : 2;
+	ship->mass = dictionary.contains("Mass") ? (int)dictionary["Mass"] : 100;
+	ship->size = dictionary.contains("Size") ? (float)dictionary["Size"] : 0.15f;
+	ship->cargoSpace = dictionary.contains("CargoSpace") ? (int)dictionary["CargoSpace"] : 15;
+	ship->modSpace = dictionary.contains("ModSpace") ? (int)dictionary["ModSpace"] : 20;
+	if (dictionary.contains("Start")) {
+		Plugin::plugins["default"]->spaceships["start"] = ship;
+	}
+	ship->flags = dictionary.contains("Flags") ? dictionary["Flags"] : empty;
+	ship->price = dictionary.contains("Price") ? (int)dictionary["Price"] : 10000;
+	ship->description = dictionary.contains("Description") ? dictionary["Description"] : "";
+	ship->initData["Mods"] = dictionary.contains("Mods") ? dictionary["Mods"] : empty;
+	ship->initData["Hardpoints"] = dictionary.contains("Hardpoints") ? dictionary["Hardpoints"] : empty;
+	ship->shields = dictionary.contains("Shields") ? (int)dictionary["Shields"] : 30;
+	ship->maxShield = ship->shields;
+	ship->armor = dictionary.contains("Armor") ? (int)dictionary["Armor"] : 20;
+	ship->maxArmor = ship->armor;
+	ship->fuel = dictionary.contains("Fuel") ? (int)dictionary["Fuel"] : 5;
+	ship->maxFuel = ship->fuel;
+	ship->flagRequirements = dictionary.contains("FlagRequirements") ? dictionary["FlagRequirements"] : "";
+	if( dictionary.contains("RechargeTime") )
+		ship->rechargeRate = ship->maxShield / dictionary["RechargeTime"];
+	/*
+	ship->defaultAI = [[dictionary objectForKey:@"DefaultAI"] copy];
+	ship->primaryStraight = [dictionary objectForKey:@"Hardpoints"];
+	ship->cargo = [dictionary objectForKey:@"Cargo"];
+	if( [dictionary objectForKey:@"FramePath"] )
+		ship->frameFile = [[NSString alloc] initWithFormat:@"%@/%@", [[NSFileManager defaultManager] currentDirectoryPath], [dictionary objectForKey:@"FramePath"]];
+
+		*/
+	if (dictionary.contains("Replace"))
+		ship->ID = dictionary["Replace"];
+	vector<string> temp = split(ship->ID, '.');
+	if (!Plugin::plugins.contains(temp[0]))
+		Plugin::plugins[temp[0]] = make_shared<Plugin>();
+	Plugin::plugins[temp[0]]->spaceships[temp[2]] = ship;
+}
+
+void Spaceship::finalize() {
+	if (!initData.is_null()) {
+		for (auto it = initData["Hardpoints"].begin(); it != initData["Hardpoints"].end(); it++) {
+			vector<Coord>* array;
+			if (it.key() == "PrimaryStraight") {
+				array = &primaryStraight;
+			} else if (it.key() == "PrimaryTurret") {
+				array = &primaryTurret;
+			} else if (it.key() == "SecondaryStraight") {
+				array = &secondaryStraight;
+			} else if (it.key() == "SecondaryTurret") {
+				array = &secondaryTurret;
+			}
+			for( auto cit = it.value().begin(); cit != it.value().end(); cit++ ) {
+				Coord coord;
+				coord.x = cit.value()[0];
+				coord.y = cit.value()[1];
+				coord.z = cit.value()[2];
+				array->push_back(coord);
+			}
+		}
+	}
+	initData.clear();
 }
 
 void Spaceship::update() {
@@ -97,9 +189,9 @@ void Spaceship::update() {
 	z += speedz * sys->FACTOR;
 	y += speedy * sys->FACTOR;
 
-	collide((SpaceObject**)sys->planets.data(), sys->planets.size());
-	collide((SpaceObject**)sys->ships.data(), sys->ships.size());
-	collide((SpaceObject**)sys->asteroids.data(), sys->asteroids.size());
+	collide(sys->planets);
+	collide(sys->ships);
+	collide(sys->asteroids);
 
 	if (deltaRot > MAX_ANGULAR_VELOCITY)
 		deltaRot = MAX_ANGULAR_VELOCITY;
@@ -184,7 +276,7 @@ void Spaceship::update() {
 
 void Spaceship::bracket() {
 	glColor3f(0, 1, 0);
-	if( sys->enemies.count(this) )
+	if( sys->enemies.count(shared_ptr<Spaceship>(this)) )
 		glColor3f(1, 0, 0);
 	else if (escortee == sys)
 		glColor3f(1, 1, 0);

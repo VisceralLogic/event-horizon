@@ -39,7 +39,7 @@ void Asteroid::update() {
 		speedy *= 4 / MAX_VELOCITY;
 	}
 	angle += deltaRot * sys->FACTOR;
-	collide((SpaceObject**)sys->planets.data(), sys->planets.size());
+	collide(sys->planets);
 }
 
 void Asteroid::draw() {

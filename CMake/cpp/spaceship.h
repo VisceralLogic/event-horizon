@@ -1,8 +1,10 @@
 #pragma once
 #include <set>
+#include <memory>
 
 #include "object3D.h"
 #include "coord.h"
+#include "ehobject.h"
 //#include "government.h"
 
 class AI;
@@ -11,7 +13,7 @@ class Mod;
 class Cargo;
 class Government;
 
-class Spaceship : public Object3D {
+class Spaceship : public Object3D, public EHObject {
 public:
 	bool left, right, forward, slow, autopilot, orbit, hyperspace, land, fire, fireSecondary, up, down, throttleUp, throttleDown, afterburner;
 	Planet* curPlanet;				// selected planet
@@ -19,10 +21,10 @@ public:
 	float hyperTime;				// powering up for hyper jump
 	int cargoSpace;					// max room for cargo
 	int modSpace;					// room for mods;
-	vector<Mod*> mods;			// array of mods
-	vector<Cargo*> cargo;			// array of current cargos
+	vector<shared_ptr<Mod>> mods;			// array of mods
+	vector<shared_ptr<Cargo>> cargo;			// array of current cargos
 	int money;						// how much money the ship has
-	vector<Weapon*> weapons;		// array of weapons
+	vector<shared_ptr<Weapon>> weapons;		// array of weapons
 	int secondaryIndex;				// which secondary weapon is selected
 	float shields;					// 
 	int armor;						//
@@ -32,14 +34,14 @@ public:
 	int maxArmor;					//
 	int maxFuel;					//
 	string defaultAI;			// which AI to use
-	set<Spaceship*> enemies;		// enemy ships in system
-	Government* gov;				// which government this ship belongs to
+	set<shared_ptr<Spaceship>> enemies;		// enemy ships in system
+	shared_ptr<Government> gov;				// which government this ship belongs to
 	enum {
 		ALIVE,
 		DISABLED,
 		DEAD
 	} state;						// what state is this ship currently in
-	vector<Weapon*> secondary;		// array of secondary weapon launchers
+	vector<shared_ptr<Weapon>> secondary;		// array of secondary weapon launchers
 	vector<Coord> primaryStraight, primaryTurret, secondaryStraight, secondaryTurret;
 	// array of hardpoints to fire weapons from
 	Spaceship* escortee;			// spaceship to escort
@@ -58,7 +60,7 @@ public:
 
 	Spaceship();
 	~Spaceship();
-	static void registerFromDictionary(map<void*, void*>& dictionary);
+	static void registerFromDictionary(const json& dictionary);
 	void finalize();	// needed for plugins
 	virtual void update();
 	void goLeft();
@@ -74,10 +76,10 @@ public:
 	virtual void doLand();
 	void doFire(bool primary);
 	Spaceship* newInstance();
-	void addMod(Mod* mod);
+	void addMod(shared_ptr<Mod> mod);
 	Mod* hasMod();
-	void hitBy(Weapon* weapon);
-	bool addEnemy(Spaceship* enemy);
+	void hitBy(shared_ptr<Weapon> weapon);
+	bool addEnemy(shared_ptr<Spaceship> enemy);
 	void bracket();
 	void throttle(bool forward);
 	void doAfterburner();

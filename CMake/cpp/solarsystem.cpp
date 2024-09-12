@@ -3,6 +3,9 @@
 #include "controller.h"
 #include "texture.h"
 #include "ai.h"
+#include "plugin.h"
+#include "type.h"
+#include "government.h"
 
 GLuint backdrop[4];
 int backdropWidth[4];
@@ -11,6 +14,7 @@ int backdropHeight[4];
 void Solarsystem::setUp() {
 	int i, j = 0;
 
+
 	displayOnMap = true;
 	sys->selection = nullptr;
 	sys->shipIndex = -1;
@@ -18,11 +22,11 @@ void Solarsystem::setUp() {
 	sys->planetIndex = -1;
 	sys->enemies.clear();
 	sys->ships.clear();
-	sys->ships.push_back(sys);
+	sys->ships.push_back(shared_ptr<Spaceship>(sys));
 	sys->weaps.clear();
 	sys->asteroids.clear();
 	for (i = 0; i < planets.size(); i++) {
-		Planet* planet = planets[i];
+		shared_ptr<Planet> planet = planets[i];
 		if (!planet->model) {
 			Texture::loadTexture(planet->texFile.c_str(), &sys->planetTex[i], nullptr, nullptr);
 			planet->texture[0] = sys->planetTex[i];
@@ -46,7 +50,7 @@ void Solarsystem::setUp() {
 		[sys->ships addObject : tempShip] ;
 	}*/
 	for (i = 0; i < asteroids; i++) {
-		sys->asteroids.push_back(new Asteroid());
+		sys->asteroids.push_back(shared_ptr<Asteroid>(new Asteroid()));
 	}
 	for (i = 0; i < backdrops; i++) {
 		Texture::loadTexture(backdropPath[i].c_str(), &backdrop[i], &backdropWidth[i], &backdropHeight[i]);
@@ -55,40 +59,75 @@ void Solarsystem::setUp() {
 		sys->systems.emplace(ID);
 }
 
+void Solarsystem::registerFromDictionary(const json& dictionary) {
+	shared_ptr<Solarsystem> system = make_shared<Solarsystem>();
+	json empty;
+	system->name = dictionary.contains("Name") ? dictionary["Name"] : dictionary["ID"];
+	system->ID = (string)dictionary["PluginName"] + ".systems." + (string)dictionary["ID"];
+	if( dictionary.contains("Coords") && dictionary["Coords"].is_array() ) {
+		system->x = dictionary["Coords"][0];
+		system->z = dictionary["Coords"][1];
+	}
+	else {
+		system->x = 0;
+		system->z = 0;
+	}
+	if (dictionary.contains("Start")) {
+		Plugin::plugins["default"]->solarsystems["start"] = system;
+	}
+	system->initData["Planets"] = dictionary.contains("Planets") ? dictionary["Planets"] : empty;
+	system->initData["Links"] = dictionary.contains("Links") ? dictionary["Links"] : empty;
+	system->initData["Government"] = dictionary["Government"];
+	system->flags = dictionary.contains("Flags") ? dictionary["Flags"] : empty;
+	system->shipCount = dictionary.contains("ShipCount") ? (int)dictionary["ShipCount"] : 1;
+	system->description = dictionary.contains("Description") ? (string)dictionary["Description"] : "";
+	system->asteroids = dictionary.contains("Asteroids") ? (int)dictionary["Asteroids"] : 5;
+	system->initData["ShipTypes"] = dictionary.contains("ShipTypes") ? dictionary["ShipTypes"] : empty;
+	if (dictionary.contains("Backdrops") && dictionary["Backdrops"].is_array()) {
+		system->backdrops = dictionary["Backdrops"].size();
+		for (int i = 0; i < system->backdrops; i++) {
+			system->backdropPath.push_back((string)dictionary["Directory"] + (string)dictionary["Backdrops"][i]["Path"]);
+			system->backdropAngle[i] = dictionary["Backdrops"][i]["Angle"];
+			system->backdropElev[i] = dictionary["Backdrops"][i]["Height"];
+		}
+	}
+	else {
+		system->backdrops = 0;
+	}
+	system->displayOnMap = false;
+	if (dictionary.contains("Replace"))
+		system->ID = dictionary["Replace"];
+	vector<string> temp = split(system->ID, '.');
+	if (!Plugin::plugins.contains(temp[0]))
+		Plugin::plugins[temp[0]] = make_shared<Plugin>();
+	Plugin::plugins[temp[0]]->solarsystems[temp[2]] = system;
+}
+
 void Solarsystem::finalize() {
-	//int i, count = [initData count];
-	//NSMutableArray* temp;
+	if (initData["Planets"].is_array()) {
+		for (auto& planet : initData["Planets"]) {
+			planets.push_back(static_pointer_cast<Planet>(Controller::componentNamed(planet)));
+		}
+	}
 
-	////NSLog( @"Finalizing system: %@", name );
-	//for (i = 0; i < count - 3; i++) {	// load planets
-	//	//NSLog( @"\tadding planet: %@", [initData objectAtIndex:i] );
-	//	[planets addObject : [Controller componentNamed : [initData objectAtIndex : i] ] ] ;
-	//}
+	if (initData["Links"].is_array()) {
+		for (auto& link : initData["Links"]) {
+			shared_ptr<Solarsystem> s = static_pointer_cast<Solarsystem>(Controller::componentNamed(link));
+			if (find(links.begin(), links.end(), s) == links.end())
+				links.push_back(s);
+			if (find(s->links.begin(), s->links.end(), shared_from_this()) == s->links.end())
+				s->links.push_back(shared_from_this());
+		}
+	}
 
-	//temp = [initData objectAtIndex : count - 3];	// load links
-	//for (i = 0; i < [temp count]; i++) {
-	//	Solarsystem* s;
-	//	//NSLog( @"\tadding link: %@", [temp objectAtIndex:i] );
-	//	s = [Controller componentNamed : [temp objectAtIndex : i] ];
-	//	if (![links containsObject : s])
-	//		[links addObject : s];
-	//	if (![s->links containsObject : self])
-	//		[s->links addObject : self];
-	//}
+	if( !initData["Government"].is_null() ) {
+		gov = static_pointer_cast<Government>(Controller::componentNamed(initData["Government"]));
+	}
 
-	//gov = [Controller componentNamed : [initData objectAtIndex : count - 2] ];
+	shared_ptr<Type> types = make_shared<Type>();
+	types->initData = initData["ShipTypes"];
 
-	//temp = [initData objectAtIndex : count - 1];
-	//types = [[Type alloc]init];
-	//types->data = [[NSMutableArray alloc]initWithCapacity:[temp count] ];
-	//for (i = 0; i < [temp count]; i++) {
-	//	NSDictionary* dict = [temp objectAtIndex : i];
-	//	TypeNode* node = [[TypeNode alloc]init];
-	//	node->data = [Controller componentNamed : [dict objectForKey : @"TypeID"] ];
-	//	node->probability = [[dict objectForKey : @"Probability"]floatValue];
-	//	[types->data addObject : node] ;
-	//}
-	//[initData release] ;
+	initData.clear();
 }
 
 void Solarsystem::update() {

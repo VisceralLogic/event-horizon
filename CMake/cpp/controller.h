@@ -1,7 +1,13 @@
 #pragma once	
 
 #include <set>
+#include <memory>
+#include <chrono>
 #include <SDL2/SDL.h>
+#include <nlohmann/json.hpp>
+#include <filesystem>
+
+using json = nlohmann::json;
 
 #include "spaceobject.h"
 #include "planet.h"
@@ -13,6 +19,7 @@
 
 class Mission;
 class Plugin;
+class EHObject;
 
 enum {
 	NAVPANEL_TEXTURE,
@@ -74,20 +81,22 @@ protected:
 	static GLShaderProgram* stringShader;
 
 public:
-	vector<Planet*> planets;
-	Solarsystem* system;
+	static GLShaderProgram* shader;
+
+	vector<shared_ptr<Planet>> planets;
+	shared_ptr<Solarsystem> system;
 	string message;
 	float messageTime;
-	vector<Spaceship*> ships;
-	vector<Weapon*> weaps;
-	vector<Asteroid*> asteroids;
-	vector<Mission*> missions;
+	vector<shared_ptr<Spaceship>> ships;
+	vector<shared_ptr<Weapon>> weaps;
+	vector<shared_ptr<Asteroid>> asteroids;
+	vector<shared_ptr<Mission>> missions;
 
 	int planetIndex;
 	int shipIndex;
 
 	float FACTOR;	// multiply by for varying FPS
-	map<string, Plugin*> plugins;
+	map<string, shared_ptr<Plugin>> plugins;
 	float GRAVITY;
 	int screenWidth, screenHeight;
 	float t;
@@ -97,11 +106,11 @@ public:
 	int val[END_OF_KEYS];
 	//Background* bg;					// draws stars
 	int systemIndex;				// which system is selected
-	vector<Solarsystem*> itinerary;		// systems to travel to
+	vector<shared_ptr<Solarsystem>> itinerary;		// systems to travel to
 	int viewStyle;					// forward, top, back
 	float shipCheckTime;			// when to check to see if new ships should be added to system
 	float shipCheckDelta;			// how much to increase shipCheckTime
-	//NSDate* date;					// game date
+	chrono::system_clock::time_point date;					// game date
 	bool pause;						// pause the game
 	map<int, int> govRecord;	// key: gov ID, value: number reflecting position with regard to that government
 	float floatVal[END_OF_FLOATS];		// pref values stored here
@@ -112,24 +121,20 @@ public:
 	set<string> systems;		// visited systems
 
 	static string basePath;
-
-	static void* componentNamed(string name);
-
 /*
 + (NSMutableDictionary *) ensurePlugin:(NSString *)pluginName path:(NSString *)path;
 + (NSMutableArray *) objectsOfType:(NSString *)type withFlags:(NSString *)flags;
 + (NSMutableArray *) objects:(NSArray *)objects withFlags:(NSString *)flags;
-+ (NSMutableArray *) objectsOfType:(NSString *)type;
 */
 	static void initialize();
 	Controller(string name, bool isNew);
 	void initPlugins();
-	//void initDataFor(Plugin* plugin);
-	void loadFileForPlugin(string file, string name);
+	void initDataFor(const string& plugin);
+	void loadFileForPlugin(const filesystem::path& file, const string& name);
 	void finalizePlugin(string id);
 	void update();
-	void setSystem(Solarsystem* system);
-	void setShip(Spaceship* ship);
+	void setSystem(shared_ptr<Solarsystem> system);
+	void setShip(shared_ptr<Spaceship> ship);
 	//- (NSMutableDictionary *) getPlugins;
 	void save();
 	void load();
@@ -145,12 +150,16 @@ public:
 	void drawInfoTab();
 
 	static void drawString(const string& str, float x, float y, float *color);
+	static vector<shared_ptr<EHObject>> objectsOfType(const string& type);
+	static shared_ptr<EHObject> componentNamed(const string& name);
 };
 
 void drawGLScene();
 void beginOrtho();
 void endOrtho();
 void drawString(string str, float x, float y);
+vector<string> split(const string& str, char c);
+string replace(const string& str, const string& find, const string& replace);
 extern void (*drawScene)(void);
 extern void (*eventScene)(SDL_Event&);
 extern int gScreenWidth;

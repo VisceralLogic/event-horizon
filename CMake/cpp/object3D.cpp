@@ -2,6 +2,7 @@
 #include <sstream>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 
 #include "object3D.h"
 #include "texture.h"
@@ -50,6 +51,23 @@ vector<string> Object3D::split(string str, char delimiter) {
 	return result;
 }
 
+// split a string on another string
+vector<string> Object3D::split(string str, string delimiter) {
+	vector<string> result;
+	size_t pos = 0;
+	string token;
+
+	while ((pos = str.find(delimiter)) != string::npos) {
+		token = str.substr(0, pos);
+		result.push_back(token);
+		str.erase(0, pos + delimiter.length());
+	}
+
+	result.push_back(str);
+
+	return result;
+}
+
 Object3D::Object3D() {
 	texNum = 1;
 	texture.resize(1);
@@ -73,6 +91,10 @@ void Object3D::loadOBJ(string objfile) {
 
 	obj = true;
 	file.open(objfile);
+	if( !file.is_open()) {
+		cerr << "Could not open file: " << objfile << endl;
+		return;
+	}
 	string str;
 	while ( file >> str && !file.eof() ) {
 		if (str[0] == '#')	// read a comment
@@ -132,7 +154,7 @@ void Object3D::loadOBJ(string objfile) {
 			comps = split(str, ' ');
 			for (i = 1; i < comps.size(); i++) {
 				string comp = comps[i];
-				vector<string> temp = comp.find("//") == string::npos ? split(comp, '/') : split(comp, '//');
+				vector<string> temp = comp.find("//") == string::npos ? split(comp, '/') : split(comp, "//");
 				Coord* c = new Coord();// [[[Coord alloc]init] autorelease];
 				c->x = stoi(temp[0]) -vCount;		// vertex number (1-based)
 				if (temp.size() == 2) {
@@ -191,7 +213,7 @@ void Object3D::loadOBJ(string objfile) {
 		OBJ* o = objects[i];
 		if (textures.find(o->mtl) != textures.end())
 			texture[i] = textures[o->mtl];
-		list[i] = glGenLists(1);
+		list.push_back(glGenLists(1));
 		glNewList(list[i], GL_COMPILE);
 		objListDraw(o);
 		glEndList();
@@ -320,7 +342,7 @@ void Object3D::objListDraw(OBJ* o) {
 	}
 }
 
-void Object3D::load(char  *data, string tex) {
+void Object3D::load(const char  *data, string tex) {
 	Coord* point;
 	const char *buffer = data;
 	if( strncmp( buffer, "EVH3", 4 ) != 0 ) {

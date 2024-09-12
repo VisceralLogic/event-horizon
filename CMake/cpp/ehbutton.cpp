@@ -8,15 +8,16 @@
 #include "texture.h"
 #include "shader.h"
 
-GLuint buttonTex = 0;
-vector<EHButton*> buttons;
-EHButton* mouseButton;
-map<string, vector<EHButton*>> sets;
-vector<EHButton*> toDelete;
-GLShaderProgram* shader;
-GLuint leftVBO, leftVAO, leftEBO, midVBO, midVAO, midEBO, rightVBO, rightVAO, rightEBO;
+GLuint EHButton::buttonTex;
+vector<shared_ptr<EHButton>> EHButton::buttons;
+shared_ptr<EHButton> EHButton::mouseButton;
+map<string, vector<shared_ptr<EHButton>>> EHButton::sets;
+vector<shared_ptr<EHButton>> EHButton::toDelete;
+GLShaderProgram* EHButton::shader;
+GLuint EHButton::leftVBO, EHButton::leftVAO, EHButton::leftEBO, EHButton::midVBO, EHButton::midVAO, EHButton::midEBO, EHButton::rightVBO, EHButton::rightVAO, EHButton::rightEBO;
 
 void EHButton::initialize() {
+	buttonTex = 0;
 	int tempWidth = 0, tempHeight = 0;
 	Texture::loadTexture(Controller::basePath + "Images/Button.png", &buttonTex, &tempWidth, &tempHeight);
 
@@ -122,36 +123,39 @@ void EHButton::initialize() {
 }
 
 void EHButton::update() {
-	for (EHButton* button : buttons) {
+	for (shared_ptr<EHButton> button : buttons) {
 		button->draw();
 	}
-	for(EHButton* button : toDelete) {
-		delete button;
+	for(shared_ptr<EHButton> button : toDelete) {
+		for (auto it = buttons.begin(); it != buttons.end(); ++it) {
+			if (button == *it) {
+				buttons.erase(it, it + 1);
+				break;
+			}
+		}
 	}
 	toDelete.clear();
 }
 
 void EHButton::removeByName(const string& name) {
-	for( int i = 0; i < buttons.size(); i++) {
-		if (buttons[i]->text == name) {
-			toDelete.push_back(buttons[i]);
-			buttons.erase(buttons.begin() + i);
+	for( shared_ptr<EHButton> button : buttons ) {
+		if (button->text == name) {
+			toDelete.push_back(button);
 			return;
 		}
 	}
 }
 
-void EHButton::remove(EHButton* button) {
-	for( int i = 0; i < buttons.size(); i++) {
-		if (buttons[i] == button) {
-			toDelete.push_back(buttons[i]);
-			buttons.erase(buttons.begin() + i);
+void EHButton::remove(shared_ptr<EHButton> button) {
+	for( shared_ptr<EHButton> b : buttons ) {
+		if (b == button) {
+			toDelete.push_back(button);
 			return;
 		}
 	}
 }
 
-EHButton* EHButton::buttonWithName(const string& name) {
+shared_ptr<EHButton> EHButton::buttonWithName(const string& name) {
 	for( int i = 0; i < buttons.size(); i++) {
 		if (buttons[i]->text == name) {
 			return buttons[i];
@@ -161,14 +165,14 @@ EHButton* EHButton::buttonWithName(const string& name) {
 }
 
 void EHButton::setName(const string& name, const string& oldName) {
-	EHButton *button = buttonWithName(oldName);
+	shared_ptr<EHButton> button = buttonWithName(oldName);
 	if (button) {
 		button->text = name;
 	}
 }
 
 void EHButton::clear() {
-	for (EHButton* button : buttons) {
+	for (shared_ptr<EHButton> button : buttons) {
 		toDelete.push_back(button);
 	}
 	buttons.clear();
@@ -187,8 +191,8 @@ void EHButton::clearSet(const string& name) {
 	sets.erase(name);
 }
 
-EHButton* EHButton::newButton(const string& text, int x, int y, int width, void (*call)(void), void (*callParam)(const string& param), int active, int (*isActive)(void)) {
-	EHButton* button = new EHButton();
+shared_ptr<EHButton> EHButton::newButton(const string& text, int x, int y, int width, void (*call)(void), void (*callParam)(const string& param), int active, int (*isActive)(void)) {
+	shared_ptr<EHButton> button(new EHButton());
 	button->text = text;
 	button->x = x;
 	button->y = y;
@@ -206,7 +210,7 @@ void EHButton::handleEvent(SDL_Event &event) {
 				int x, y;
 		SDL_GetMouseState(&x, &y);
 		y = gScreenHeight - y;
-		for( EHButton *b : buttons ){
+		for( shared_ptr<EHButton> b : buttons ){
 			if( b->inBounds(x, y) )
 				b->_mouseIn = true;
 			else
@@ -220,7 +224,7 @@ void EHButton::handleEvent(SDL_Event &event) {
 		// check if left button
 		if( event.button.button != SDL_BUTTON_LEFT )
 			return;
-		for( EHButton *b : buttons ){
+		for( shared_ptr<EHButton> b : buttons ){
 			if( b->inBounds(x, y) ){
 				b->_pressed = true;
 				mouseButton = b;
@@ -232,14 +236,14 @@ void EHButton::handleEvent(SDL_Event &event) {
 		int x, y;
 		SDL_GetMouseState(&x, &y);
 		y = gScreenHeight - y;
-		if( mouseButton && event.button.button == SDL_BUTTON_LEFT ) {
+		if( mouseButton.get() && event.button.button == SDL_BUTTON_LEFT) {
 			if (mouseButton->inBounds(x, y)) {
 				mouseButton->_clicked = true;
 			}
 			else {
 				mouseButton->_pressed = false;
 			}
-			mouseButton = NULL;
+			mouseButton = nullptr;
 		}
 	}
 }

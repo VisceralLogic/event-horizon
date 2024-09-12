@@ -1,8 +1,9 @@
 #include <SDL2/SDL.h>
 #include <fstream>
 #include <iostream>
-#include <SDL_filesystem.h>
+#include <filesystem>
 #include <glm/gtc/type_ptr.hpp>
+#include <nlohmann/json.hpp>
 
 #include <freetype-gl/freetype-gl.h>
 #include <freetype-gl/vertex-buffer.h>
@@ -12,11 +13,24 @@
 
 #include "controller.h"
 #include "ai.h"
+#include "plugin.h"
+#include "ehobject.h"
+#include "mission.h"
+#include "government.h"
+#include "solarsystem.h"
+#include "spaceship.h"
+#include "mod.h"
+#include "weapon.h"
+#include "type.h"
 
 #define sqr(x) ((x)*(x))
 
+using json = nlohmann::json;
+
 void (*drawScene)(void);
 void (*eventScene)(SDL_Event&);
+
+static void toLower(string& str);
 
 void add_text(GLfloat* vertices, GLuint* indices, texture_font_t* font, const string& str, float x, float y);
 
@@ -40,39 +54,16 @@ bool debug = false;
 texture_atlas_t* atlas;
 texture_font_t* font;
 
-string vert_source = "#version 330 core\n"
-"layout(location = 0) in vec3 vertex;\n"
-"layout(location = 1) in vec2 tex_coord;\n"
-"uniform mat4 projection;\n"
-"out vec2 TexCoords;\n"
-"void main() {\n"
-"	TexCoords = tex_coord;\n"
-"	gl_Position = projection * vec4(vertex, 1.0);\n"
-"	TexCoords = tex_coord;\n"
-"}\n";
-
-string frag_source = "#version 330 core\n"
-"out vec4 color;\n"
-"uniform sampler2D text;\n"
-"uniform vec3 textColor;\n"
-"in vec2 TexCoords;\n"
-"void main() {\n"
-"	vec4 sample = texture(text, TexCoords);\n"
-"	color = vec4(textColor, sample.r);\n"
-"}\n";
-
 string Controller::basePath;
 GLShaderProgram* Controller::stringShader;
+GLShaderProgram* Controller::shader;
 
 void Controller::initialize() {
-	stringShader = new GLShaderProgram(vert_source, frag_source);
-	char *temp = SDL_GetBasePath();
-	basePath = temp;
-	SDL_free(temp);
+	basePath = filesystem::current_path().string() + "/";
 	atlas = texture_atlas_new(128, 128, 1);
 	font = texture_font_new_from_file(atlas, 16, (Controller::basePath + "Resources/ChicagoFLF.ttf").c_str());
 	char* str = new char[97];
-	for( int i = 0; i < 96; i++ )
+	for (int i = 0; i < 96; i++)
 		str[i] = i + 32;
 	str[96] = 0;
 	texture_font_load_glyphs(font, str);
@@ -83,6 +74,134 @@ void Controller::initialize() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlas->width, atlas->height, 0, GL_RED, GL_UNSIGNED_BYTE, atlas->data);
+
+	string stringVertSource = "#version 330 core\n"
+		"layout(location = 0) in vec3 vertex;\n"
+		"layout(location = 1) in vec2 tex_coord;\n"
+		"uniform mat4 projection;\n"
+		"out vec2 TexCoords;\n"
+		"void main() {\n"
+		"	TexCoords = tex_coord;\n"
+		"	gl_Position = projection * vec4(vertex, 1.0);\n"
+		"	TexCoords = tex_coord;\n"
+		"}\n";
+
+	string stringFragSource = "#version 330 core\n"
+		"out vec4 color;\n"
+		"uniform sampler2D text;\n"
+		"uniform vec3 textColor;\n"
+		"in vec2 TexCoords;\n"
+		"void main() {\n"
+		"	vec4 sample = texture(text, TexCoords);\n"
+		"	color = vec4(textColor, sample.r);\n"
+		"}\n";
+	stringShader = new GLShaderProgram(stringVertSource, stringFragSource);
+
+	string shaderVertSource = "#version 330 core\n"
+		"layout(location = 0) in vec3 vertex;\n"
+		"layout(location = 1) in vec3 normal;\n"
+		"layout(location = 2) in vec2 tex_coord;\n"
+		"uniform mat4 projection;\n"
+		"uniform mat4 view;\n"
+		"uniform mat4 model;\n"
+		"out vec2 TexCoords;\n"
+		"out vec3 FragPos;\n"
+		"out vec3 Normal;\n"
+		"void main() {\n"
+		"	TexCoords = tex_coord;\n"
+		"	Normal = normal;\n"
+		"	FragPos = vec3(model * vec4(vertex, 1.0));\n"
+		"	gl_Position = projection * view * vec4(FragPos, 1.0);\n"
+		"}\n";
+	string shaderFragSource = "#version 330 core\n"
+		"out vec4 color;\n"
+		"uniform sampler2D text;\n"
+		"in vec2 TexCoords;\n"
+		"in vec3 Normal;\n"
+		"in vec3 FragPos;\n"
+		"void main() {\n"
+		// ambient
+		"	float ambientStrength = 0.1;"
+		"	vec3 ambient = vec3(ambientStrength);"
+		// diffuse
+		"	vec3 norm = normalize(Normal);"
+		"	vec3 lightDir = normalize(vec3(1, 0, 0));"
+		"	float diff = max(dot(norm, lightDir), 0.0);"
+		"	vec3 diffuse = diff * vec3(1.0);"
+		// specular
+		"	float specularStrength = 0.5;"
+		"	vec3 viewDir = normalize(vec3(0, 0, 3) - FragPos);"
+		"	vec3 reflectDir = reflect(-lightDir, norm);"
+		"	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);"
+		"	vec3 specular = specularStrength * spec * vec3(1.0);"
+		// result
+		//"	vec4 sample = texture(text, TexCoords);\n"
+		"	color = vec4(ambient + diffuse + specular, 1.0);\n"
+		"}\n";
+	shader = new GLShaderProgram(shaderVertSource, shaderFragSource);
+}
+
+void Controller::initPlugins() {
+	// list directories in basePath
+	filesystem::path path = basePath + "Plugins";
+	vector<string> files;
+	for (const auto& entry : filesystem::directory_iterator(path)) {
+		if (entry.is_directory())
+			files.push_back(entry.path().string());
+	}
+	// for each directory, load data
+	for (const string& file : files) {
+		string plugin = file.substr(file.find_last_of(filesystem::path::preferred_separator) + 1);
+		initDataFor(plugin);
+	}
+}
+
+void Controller::initDataFor(const string& plugin) {
+	string lower = plugin;
+	toLower(lower);
+	for (const auto& entry : filesystem::recursive_directory_iterator(basePath + "Plugins/" + plugin)) {
+		if (entry.is_regular_file()) {
+			filesystem::path path = entry.path();
+			if (path.extension() == ".json" || path.extension() == ".JSON")
+				loadFileForPlugin(path, lower);
+		}
+	}
+}
+
+void Controller::loadFileForPlugin(const filesystem::path& filePath, const string& pluginName) {
+	ifstream inF(filePath.string());
+	json data = json::parse(inF);
+	if (!data.contains("Type"))
+		return;
+	string typeName = data["Type"];
+	toLower(typeName);
+	data["PluginName"] = pluginName;
+	filesystem::path directory = filePath;
+	data["Directory"] = directory.remove_filename().string();
+	if( !data.contains("ID") )
+		data["ID"] = filePath.stem().string();
+	if (typeName == "spaceship") {
+		Spaceship::registerFromDictionary(data);
+	}
+	else if (typeName == "mod") {
+		Mod::registerFromDictionary(data);
+	}
+	else if (typeName == "weapon") {
+		Weapon::registerFromDictionary(data);
+	}
+	else if (typeName == "mission") {
+		Mission::registerFromDictionary(data);
+	}
+	else if (typeName == "government") {
+		Government::registerFromDictionary(data);
+	}
+	else if (typeName == "solarsystem") {
+		Solarsystem::registerFromDictionary(data);
+	} else if( typeName == "planet" ) {
+		Planet::registerFromDictionary(data);
+	} else if( typeName == "type" ) {
+		Type::registerFromDictionary(data);
+	}
 }
 
 Controller::Controller(string name, bool isNew) {
@@ -106,22 +225,30 @@ Controller::Controller(string name, bool isNew) {
 	angle = 0;
 	texNum = NUM_TEXTURES;
 	texture.resize(texNum);
-	//initPlugins();
+	initPlugins();
 	if (isNew) {
-		setSystem((Solarsystem*)componentNamed("default.systems.start"));
-		setShip((Spaceship*)componentNamed("default.ships.start"));
+		setSystem(static_pointer_cast<Solarsystem>(componentNamed("default.systems.start")));
+		setShip(static_pointer_cast<Spaceship>(componentNamed("default.ships.start")));
+		tm m_date;
+		m_date.tm_year = 350;
+		m_date.tm_mon = 0;
+		m_date.tm_mday = 1;
+		m_date.tm_hour = 0;
+		m_date.tm_min = 0;
+		m_date.tm_sec = 0;
+		date = chrono::system_clock::from_time_t(mktime(&m_date));
 	}
-	((map<string, Solarsystem*>*)componentNamed("systems"))->erase("start");
-	((map<string, Spaceship*>*)componentNamed("ships"))->erase("start");
+	//((map<string, Solarsystem*>*)componentNamed("systems"))->erase("start");
+	//((map<string, Spaceship*>*)componentNamed("ships"))->erase("start");
 	// change to default plugin resource path
-	textureNames[NAVPANEL_TEXTURE] = "TabView2.png";
-	textureNames[NAVPLANET_TEXTURE] = "NavPlanet.tiff";
-	textureNames[WIDGET_TEXTURE] = "Widgets.png";
-	textureNames[INFOTAB_TEXTURE] = "TabView.png";
-	textureNames[FIRE_TEXTURE] = "Fire.jpg";
-	textureNames[ASTEROID_TEXTURE] = "Asteroid.png";
-	textureNames[SHIELD_SPOT_TEXTURE] = "ShieldSpot.png";
-	textureNames[MENU_TEXTURE] = "Menu.png";
+	textureNames[NAVPANEL_TEXTURE] = Controller::basePath + "Images/TabView2.png";
+	textureNames[NAVPLANET_TEXTURE] = Controller::basePath + "Images/NavPlanet.png";
+	textureNames[WIDGET_TEXTURE] = Controller::basePath + "Images/Widgets.png";
+	textureNames[INFOTAB_TEXTURE] = Controller::basePath + "Images/TabView.png";
+	textureNames[FIRE_TEXTURE] = Controller::basePath + "Images/Fire.png";
+	textureNames[ASTEROID_TEXTURE] = Controller::basePath + "Images/Asteroid.png";
+	textureNames[SHIELD_SPOT_TEXTURE] = Controller::basePath + "Images/ShieldSpot.png";
+	textureNames[MENU_TEXTURE] = Controller::basePath + "Images/Menu.png";
 	loadTextures(textureNames);
 	shieldSpotTexture = texture[SHIELD_SPOT_TEXTURE];
 	menuItemTex = texture[MENU_TEXTURE];
@@ -214,7 +341,7 @@ Controller::Controller(string name, bool isNew) {
 	//startThreads();
 }
 
-void Controller::setSystem(Solarsystem* system) {
+void Controller::setSystem(shared_ptr<Solarsystem> system) {
 	this->system = system;
 	int i;
 
@@ -612,10 +739,10 @@ updateKeys:
 		planets[i]->draw();
 	}
 
-	for (i = 0; i < ships.size(); i++) {
-		Spaceship* ship = ships[i];
+	for ( shared_ptr<Spaceship> ship : ships ) {
+		shared_ptr<Spaceship> ship = ships[i];
 		if (ship->state != DEAD) {
-			if (ship != this) {
+			if (ship.get() != this) {
 				ship->draw();
 			}
 			else if (viewStyle == 1 || viewStyle == 3) {
@@ -628,12 +755,12 @@ updateKeys:
 		}
 	}
 
-	for (i = 0; i < asteroids.size(); i++) {
-		asteroids[i]->draw();
+	for (shared_ptr<Asteroid> asteroid : asteroids ) {
+		asteroid->draw();
 	}
 
-	for (i = 0; i < weaps.size(); i++) {
-		//weaps[i]->draw();
+	for (shared_ptr<Weapon> weap : weapons ) {
+		//weap->draw();
 	}
 
 	glDisable(GL_LIGHTING);
@@ -649,12 +776,10 @@ updateKeys:
 
 	glDisable(GL_CULL_FACE); // draw transparent stuff
 
-	for (i = 0; i < ships.size(); i++) {
-		Spaceship* ship = ships[i];
-		int j;
+	for ( shared_ptr<Spaceship> ship : ships ) {
 		ship->position();
 		glRotatef(90, 0, 1, 0);
-		for (j = 0; j < ship->shieldSpots.size(); j++) {
+		for (int j = 0; j < ship->shieldSpots.size(); j++) {
 			/*ShieldSpot* spot = ship->shieldSpots[j];
 			spot->update(ship->shields / (float)ship->maxShield);
 			if (spot->done) {
@@ -749,11 +874,68 @@ updateKeys:
 	//[SoundManager update] ;
 }
 
-void* Controller::componentNamed(string name) {
+vector<shared_ptr<EHObject>> Controller::objectsOfType(const string& type) {
+	vector<shared_ptr<EHObject>> temp;
+	for( auto& [key, value] : Plugin::plugins ) {
+		if( type == "mission" ){
+			for( auto& [key2, value2] : value->missions ) {
+				temp.push_back(value2);
+			}
+		}
+		else if( type == "government" ) {
+			for( auto& [key2, value2] : value->governments ) {
+				temp.push_back(value2);
+			}
+		}
+		else if( type == "system" ) {
+			for( auto& [key2, value2] : value->solarsystems ) {
+				temp.push_back(value2);
+			}
+		}
+		else if( type == "ship" ) {
+			for( auto& [key2, value2] : value->spaceships ) {
+				temp.push_back(value2);
+			}
+		}
+	}
+	return temp;
+}
+
+shared_ptr<EHObject> Controller::componentNamed(const string& name) {
+	vector<string> parts = split(name, '.');
+	shared_ptr<Plugin> plugin;
+	if( Plugin::plugins.count(parts[0]) == 0 )
+		return nullptr;
+	plugin = Plugin::plugins[parts[0]];
+	if (parts[1] == "systems") {
+		if( plugin->solarsystems.count(parts[2]) == 0 )
+			return nullptr;
+		return plugin->solarsystems[parts[2]];
+	}
+	else if( parts[1] == "ships" ){
+		if( plugin->spaceships.count(parts[2]) == 0 )
+			return nullptr;
+		return plugin->spaceships[parts[2]];
+	}
+	else if( parts[1] == "governments" ){
+		if( plugin->governments.count(parts[2]) == 0 )
+			return nullptr;
+		return plugin->governments[parts[2]];
+	}
+	else if (parts[1] == "missions") {
+		if (plugin->missions.count(parts[2]) == 0)
+			return nullptr;
+		return plugin->missions[parts[2]];
+	}
+	else if (parts[1] == "planets") {
+		if (plugin->planets.count(parts[2]) == 0)
+			return nullptr;
+		return plugin->planets[parts[2]];
+	}
 	return nullptr;
 }
 
-void Controller::setShip(Spaceship* ship) {
+void Controller::setShip(shared_ptr<Spaceship> ship) {
 
 }
 
@@ -936,4 +1118,31 @@ void add_text(GLfloat* vertices, GLuint* indices, texture_font_t* font, const st
 
 void drawGLScene() {
 
+}
+
+static void toLower(string& str) {
+	for (int i = 0; i < str.size(); i++)
+		str[i] = tolower(str[i]);
+}
+
+vector<string> split(const string& str, char c) {
+	vector<string> result;
+	string::size_type start = 0;
+	string::size_type end = 0;
+	while ((end = str.find(c, start)) != string::npos) {
+		result.push_back(str.substr(start, end - start));
+		start = end + 1;
+	}
+	result.push_back(str.substr(start));
+	return result;
+}
+
+string replace(const string& str, const string& old, const string& replace) {
+	string result = str;
+	string::size_type pos = 0;
+	while ((pos = result.find(old, pos)) != string::npos) {
+		result.replace(pos, old.size(), replace);
+		pos += replace.size();
+	}
+	return result;
 }

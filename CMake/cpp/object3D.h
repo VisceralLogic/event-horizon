@@ -16,7 +16,7 @@ public:
 
 	Object3D();
 	~Object3D();
-	void load(char *data, string tex);			// load 3D data from file
+	void load(const char *data, string tex);	// load 3D data from file
 	void drawObject();	// draw self
 	void listDraw();		// make gl calls for drawing list
 	void objListDraw(OBJ* o);	// gl calls for OBJ file
@@ -25,4 +25,5 @@ public:
 	static void makeNormal(vector<Coord*>& array, int index);
 	static void normalize(Coord* a, Coord* b, Coord* c);
 	static vector<string> split(string str, char delimiter);
+	static vector<string> split(string str, string delimiter);
 };

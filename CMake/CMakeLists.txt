@@ -22,13 +22,23 @@ set(SOURCES "ai.h"
     "ehbutton.h"
     "ehmenuitem.cpp"
     "ehmenuitem.h"
+    "ehobject.h"
+    "government.cpp"
+    "government.h"
     "main.cpp"
+    "mission.cpp"
+    "mission.h"
+    "mod.cpp"
+    "mod.h"
     "obj.h"
     "object3D.cpp"
     "object3D.h"
+    "planet.cpp"
     "planet.h"
     "player.cpp"
     "player.h"
+    "plugin.cpp"
+    "plugin.h"
     "shader.cpp"
     "shader.h"
     "shieldspot.cpp"
@@ -39,9 +49,14 @@ set(SOURCES "ai.h"
     "spaceobject.h"
     "spaceship.cpp"
     "spaceship.h"
+    "sphere.cpp"
+    "sphere.h"
     "texture.cpp"
     "texture.h"
-    
+    "type.cpp"
+    "type.h"
+    "weapon.cpp"
+    "weapon.h"
 )
 
 list(TRANSFORM SOURCES PREPEND "cpp/")
@@ -67,6 +82,9 @@ target_link_libraries(EventHorizon PRIVATE glm::glm-header-only)
 
 find_package(freetype-gl CONFIG REQUIRED)
 target_link_libraries(EventHorizon PRIVATE freetype-gl)
+
+find_package(nlohmann_json CONFIG REQUIRED)
+target_link_libraries(EventHorizon PRIVATE nlohmann_json::nlohmann_json)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET EventHorizon PROPERTY CXX_STANDARD 20)

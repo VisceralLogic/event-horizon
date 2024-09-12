@@ -19,7 +19,7 @@ Coord::Coord(double x, double y, double z, double u, double v) {
 	this->v = v;
 }
 
-Coord::Coord(Coord &coord) {
+Coord::Coord(const Coord &coord) {
 	x = coord.x;
 	y = coord.y;
 	z = coord.z;

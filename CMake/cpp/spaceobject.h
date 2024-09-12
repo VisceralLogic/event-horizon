@@ -2,7 +2,10 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <memory>
 #include <glad/glad.h>
+
+#include "sphere.h"
 
 using namespace std;
 
@@ -13,8 +16,8 @@ extern Controller* sys;
 
 class SpaceObject {
 public:
-	static SpaceObject* SPACEOBJECT_ORIGIN;
-	//static GLUquadricObj* sphereObj;
+	static shared_ptr<SpaceObject> SPACEOBJECT_ORIGIN;
+	static Sphere* sphereObj;
 	static constexpr double pi = 3.14159265358979323846;
 
 	double MAX_ANGULAR_VELOCITY;		// maximum rate of rotation
@@ -31,20 +34,18 @@ public:
 	vector<GLuint> texture;			// array of gl textures
 	int texNum;						// number of textures
 
-	double size;						// radius from center
+	float size;						// radius from center
 	int mass;						// mass of object
 
-	SpaceObject* centerOfRotation;	// SpaceObject to orbit
+	shared_ptr<SpaceObject> centerOfRotation;	// SpaceObject to orbit
 	double distance;					// distance from centerOfRotation
 	double w;						// angular velocity about centerOfRotation
 	double theta;					// angle about centerOfRotation
 
 	string name;
-	string ID;					// used for storing player data
-	void* initData;					// used to store data between init and finalize
+	//void* initData;					// used to store data between init and finalize
 	string description;			// information about this
 	string flagRequirements;		// flags planet must have for this to be sold there
-	map<string, void*>* flags;	// each flag has its name as the key, and its value as the object
 	double _x, _y, _z;				// used for rotating vectors from local to global
 	double fX, fY, fZ;				// forward vector in global
 	double rX, rY, rZ;				// right vector in global
@@ -54,11 +55,20 @@ public:
 	void loadTextures(const vector<string>& files);
 	virtual void bracket();
 	virtual void draw() {}
-	void setOrbit(SpaceObject* center);
-	void collide(SpaceObject **array, int count);
-	void bounce(SpaceObject* sphere);
+	void setOrbit(shared_ptr<SpaceObject> center);
+	
+	template<typename SO>
+	void collide(vector<shared_ptr<SO>> array) {
+		for (int i = 0; i < array.size(); i++) {
+			shared_ptr<SpaceObject> a = static_pointer_cast<SpaceObject>(array[i]);
+			if (a.get() != this)
+				bounce(a);
+		}
+	}
+
+	void bounce(shared_ptr<SpaceObject> sphere);
 	void position();
-	double getDistance(SpaceObject* other);
+	double getDistance(shared_ptr<SpaceObject> other);
 	void localToGlobal();
 	void globalToLocal();
 	void calcAngles();
@@ -81,9 +91,4 @@ public:
 	void setMass(int mass);
 	string getName();
 	void setName(string name);
-	map<string, void*>* getFlags();
 };
-
-extern SpaceObject* SPACEOBJECT_ORIGIN;
-extern Controller* sys;
-//extern GLUquadricObj* sphereObj;

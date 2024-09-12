@@ -20,5 +20,6 @@ class GLShaderProgram {
 		void setUniform3fv(const string& name, const float* value);
 
 		static glm::mat4 orthoTransform;
+		static glm::mat4 perspective;
 		static void initialize();
 };

@@ -6,18 +6,16 @@
 #include "texture.h"
 
 // static variables
-SpaceObject* SpaceObject::SPACEOBJECT_ORIGIN;
-//GLUquadricObj* SpaceObject::sphereObj;
+shared_ptr<SpaceObject> SpaceObject::SPACEOBJECT_ORIGIN;
+Sphere* SpaceObject::sphereObj;
 Controller* sys;
 
 constexpr double HOLE_FACTOR = 1.67;
 constexpr double SCALE_FACTOR = 1.1;
 
 void SpaceObject::initialize() {
-	SPACEOBJECT_ORIGIN = new SpaceObject();
-	/*sphereObj = gluNewQuadric();
-	gluQuadricTexture(sphereObj, GL_TRUE);
-	gluQuadricOrientation(sphereObj, GLU_OUTSIDE);*/
+	SPACEOBJECT_ORIGIN = make_shared<SpaceObject>();
+	sphereObj = new Sphere(20, 20);
 }
 
 void SpaceObject::loadTextures(const vector<string>& files) {
@@ -66,7 +64,7 @@ void SpaceObject::bracket() {
 	glColor3f(1, 1, 1);
 }
 
-void SpaceObject::setOrbit(SpaceObject* center) {
+void SpaceObject::setOrbit(shared_ptr<SpaceObject> center) {
 	centerOfRotation = center;
 	if (center != NULL) {
 		double m = centerOfRotation->mass;
@@ -76,18 +74,9 @@ void SpaceObject::setOrbit(SpaceObject* center) {
 	}
 }
 
-// Perform collision function with each object in array
-void SpaceObject::collide(SpaceObject **array, int count) {
-	for (int i = 0; i < count; i++) {
-		SpaceObject* a = array[i];
-		if (a != this)
-			bounce(a);
-	}
-}
-
-void SpaceObject::bounce(SpaceObject* sphere) {
+void SpaceObject::bounce(shared_ptr<SpaceObject> sphere) {
 	double distAdd = 0;
-	bool isPlanet = dynamic_cast<Planet*>(sphere) != NULL;
+	bool isPlanet = dynamic_pointer_cast<Planet>(sphere).get() != NULL;
 
 	if (this == sys)
 		distAdd = isPlanet ? .1 : .05;
@@ -175,7 +164,7 @@ void SpaceObject::position() {
 	}
 }
 
-double SpaceObject::getDistance(SpaceObject* other) {
+double SpaceObject::getDistance(shared_ptr<SpaceObject> other) {
 	return sqrt(pow(x - other->x, 2) + pow(z - other->z, 2) + pow(y - other->y, 2));
 }
 
@@ -357,8 +346,4 @@ string SpaceObject::getName() {
 
 void SpaceObject::setName(string n) {
 	name = n;
-}
-
-map<string, void*>* SpaceObject::getFlags() {
-	return flags;
 }
