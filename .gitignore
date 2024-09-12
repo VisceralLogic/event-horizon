@@ -13,3 +13,4 @@
 /CMake/out/build/x64-debug
 /CMake/vcpkg_installed
 /Plugins
+/CMake/.vscode
