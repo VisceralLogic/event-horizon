@@ -5,8 +5,12 @@
 #include "spaceship.h"
 #include "controller.h"
 #include "plugin.h"
+#include "cargo.h"
+#include <glm/ext/matrix_transform.hpp>
 
 #define sqr(x) ((x)*(x))
+
+const float Spaceship::jumpDistance = 10000;
 
 Spaceship::Spaceship() {
 	secondaryIndex = -1;
@@ -34,16 +38,6 @@ void Spaceship::registerFromDictionary(const json& dictionary) {
 	string dataFile = dictionary["Data"];
 	if (dataFile.ends_with("obj") || dataFile.ends_with("OBJ")) {
 		ship->loadOBJ((string)dictionary["Directory"] + dataFile);
-	}
-	else {
-		ifstream fileStream(dataFile);
-		if (!fileStream.is_open()) {
-			//throw std::runtime_error("Could not open file: " + dataFile);
-			return;
-		}
-		stringstream buffer;
-		buffer << fileStream.rdbuf();
-		ship->load(buffer.str().c_str(), (string)dictionary["Directory"] + (string)dictionary["PicturePath"]);
 	}
 	ship->name = dictionary.contains("Name") ? dictionary["Name"] : dictionary["ID"];
 	ship->ID = (string)dictionary["PluginName"] + ".ships." + (string)dictionary["ID"];
@@ -185,9 +179,13 @@ void Spaceship::update() {
 	if (centerOfRotation)		// if we're orbiting...
 		doOrbit();
 
-	x += speedx * sys->FACTOR;
-	z += speedz * sys->FACTOR;
-	y += speedy * sys->FACTOR;
+	glm::mat4 rot = glm::rotate(glm::mat4(1.0f), (float)deltaRot * sys->FACTOR, vUp);
+	vRight = rot * glm::vec4(vRight, 1);
+	vForward = rot * glm::vec4(vForward, 1);
+	rot = glm::rotate(glm::mat4(1.0f), (float)deltaPitch * sys->FACTOR, vRight);
+	vUp = rot * glm::vec4(vUp, 1);
+	vForward = rot * glm::vec4(vForward, 1);
+	pos += velocity * sys->FACTOR;
 
 	collide(sys->planets);
 	collide(sys->ships);
@@ -203,25 +201,21 @@ void Spaceship::update() {
 		deltaPitch = -MAX_ANGULAR_VELOCITY;
 
 	if (abSpeed != 0) {
-		if (sqr(speedx) + sqr(speedz) + sqr(speedy) > sqr(MAX_VELOCITY + abSpeed)) {
-			float vel = sqrt(sqr(speedx) + sqr(speedy) + sqr(speedz));
-			speedx *= (MAX_VELOCITY + abSpeed) / vel;
-			speedy *= (MAX_VELOCITY + abSpeed) / vel;
-			speedz *= (MAX_VELOCITY + abSpeed) / vel;
+		if (glm::dot(velocity, velocity) > sqr(MAX_VELOCITY + abSpeed)) {
+			float vel = sqrt(glm::dot(velocity, velocity));
+			velocity *= (MAX_VELOCITY + abSpeed) / vel;
 		}
 	}
-	else if (sqr(speedx) + sqr(speedz) + sqr(speedy) > (useThrottle ? sqr(throttledSpeed) : sqr(MAX_VELOCITY))) {
-		float vel = sqrt(sqr(speedx) + sqr(speedz) + sqr(speedy));
+	else if (glm::dot(velocity, velocity) > (useThrottle ? sqr(throttledSpeed) : sqr(MAX_VELOCITY))) {
+		float vel = sqrt(glm::dot(velocity, velocity));
 		float speed;
 		if (vel > (useThrottle ? throttledSpeed : MAX_VELOCITY) + ACCELERATION * sys->FACTOR)
 			speed = vel - 1.1 * ACCELERATION * sys->FACTOR;
 		else
 			speed = useThrottle ? throttledSpeed : MAX_VELOCITY;
-		speedx = speedx * speed / vel;
-		speedz = speedz * speed / vel;
-		speedy = speedy * speed / vel;
+		velocity *= speed / vel;
 	}
-	else if (useThrottle && sqr(speedx) + sqr(speedz) + sqr(speedy) < sqr(throttledSpeed)) {
+	else if (useThrottle && glm::dot(velocity, velocity) < sqr(throttledSpeed)) {
 		goForward();
 	}
 
@@ -229,43 +223,12 @@ void Spaceship::update() {
 	jitterPitch = jitter * (0.5 - rand() * 1.0 / RAND_MAX);
 	jitterRot = jitter * (0.5 - rand() * 1.0 / RAND_MAX);
 	jitter = jitter * exp(-4.6 * sys->FACTOR);
-
-	fX = cos(deltaRot * pi / 180. * sys->FACTOR + jitterRot);		// handle angle
-	fY = 0;
-	fZ = -sin(deltaRot * pi / 180. * sys->FACTOR + jitterRot);
-	rX = sin(deltaRot * pi / 180. * sys->FACTOR + jitterRot);
-	rY = 0;
-	rZ = cos(deltaRot * pi / 180. * sys->FACTOR + jitterRot);		// end angle
-	fY = sin(deltaPitch * pi / 180. * sys->FACTOR + jitterPitch);	// handle pitch
-	_x = cos(deltaPitch * pi / 180. * sys->FACTOR + jitterPitch);		// normalize
-	fX *= _x;
-	fZ *= _x;						// end pitch
-	uX = -fY * rZ;					// cross product
-	uY = rZ * fX - fZ * rX;
-	uZ = rX * fY - fX * rY;
-
-	_x = rX;
-	_y = rY;
-	_z = rZ;
-	localToGlobal();
-	rX = _x - x;
-	rY = _y - y;
-	rZ = _z - z;
-	_x = fX;
-	_y = fY;
-	_z = fZ;
-	localToGlobal();
-	fX = _x - x;
-	fY = _y - y;
-	fZ = _z - z;
-	_x = uX;
-	_y = uY;
-	_z = uZ;
-	localToGlobal();
-	uX = _x - x;
-	uY = _y - y;
-	uZ = _z - z;
-	calcAngles();
+	glm::mat4 rotMat = glm::rotate(glm::mat4(1.0f), jitterRot, vUp);
+	vUp = rotMat * glm::vec4(vUp, 1);
+	vForward = rotMat * glm::vec4(vForward, 1);
+	rotMat = glm::rotate(glm::mat4(1.0f), jitterPitch, vRight);
+	vRight = rotMat * glm::vec4(vRight, 1);
+	vForward = rotMat * glm::vec4(vForward, 1);
 
 	if (state == ALIVE) {
 		shields += rechargeRate * sys->FACTOR;
@@ -278,7 +241,7 @@ void Spaceship::bracket() {
 	glColor3f(0, 1, 0);
 	if( sys->enemies.count(shared_ptr<Spaceship>(this)) )
 		glColor3f(1, 0, 0);
-	else if (escortee == sys)
+	else if (escortee.get() == sys)
 		glColor3f(1, 1, 0);
 	if (state == DISABLED)
 		glColor3f(0.5, 0.5, 0.5);
@@ -286,19 +249,24 @@ void Spaceship::bracket() {
 }
 
 void Spaceship::goLeft() {
-
+	deltaRot += ANGULAR_ACCELERATION * sys->FACTOR;
+	if( deltaRot < 0 )
+		deltaRot += MAX_ANGULAR_VELOCITY * sys->FACTOR;
 }
 
 void Spaceship::goRight() {
+	deltaRot -= ANGULAR_ACCELERATION * sys->FACTOR;
+	if (deltaRot > 0)
+		deltaRot -= MAX_ANGULAR_VELOCITY * sys->FACTOR;
 
 }
 
 void Spaceship::goForward() {
-
+	velocity += vForward * (float)ACCELERATION * sys->FACTOR;
 }
 
 void Spaceship::goSlow() {
-
+	throttledSpeed = 0;
 }
 
 void Spaceship::doAutopilot() {
@@ -338,5 +306,9 @@ void Spaceship::goUp() {
 }
 
 void Spaceship::goDown() {
+
+}
+
+void Spaceship::addMod(shared_ptr<Mod> mod) {
 
 }

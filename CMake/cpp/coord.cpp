@@ -27,22 +27,6 @@ Coord::Coord(const Coord &coord) {
 	v = coord.v;
 }
 
-void Coord::makeOBJTex() {
-	glTexCoord2d(x, y);
-}
-
-void Coord::makeTexCoord() {
-	glTexCoord2d(u, 1 - v);
-}
-
-void Coord::makeVertex() {
-	glVertex3d(x, y, z);
-}
-
-void Coord::makeNormal() {
-	glNormal3d(x, y, z);
-}
-
 double Coord::xzDistance(Coord* c) {
 	return sqrt(pow(x - c->x, 2) + pow(z - c->z, 2));
 }

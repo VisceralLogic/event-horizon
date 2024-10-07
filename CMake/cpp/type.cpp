@@ -1,6 +1,8 @@
 #include "type.h"
 #include "controller.h"
 #include "plugin.h"
+#include "ai.h"
+#include "government.h"
 
 void Type::registerFromDictionary(const json& dictionary) {
 	shared_ptr<Type> type = make_shared<Type>();
@@ -33,4 +35,27 @@ void Type::finalize() {
 			type->initData.push_back(data);
 		}
 	}
+}
+
+shared_ptr<AI> Type::newInstance() {
+	float prob = (float)rand() / RAND_MAX;
+
+	for( auto& data : initData ) {
+		prob -= (float)data["Probability"];
+		if( prob <= 0 ) {
+			if (data.contains("ShipID")) {
+				shared_ptr<Spaceship> ship = static_pointer_cast<Spaceship>(Controller::componentNamed(data["ShipID"]));
+				string aiType = data.contains("AI") ? (string)data["AI"] : ship->defaultAI;
+				shared_ptr<AI> ai = make_shared<AI>(ship);
+				ai->gov = static_pointer_cast<Government>(Controller::componentNamed(data["GovernmentID"]));
+				return ai;
+			}
+			else if (data.contains("TypeID")) {
+				shared_ptr<Type> type = static_pointer_cast<Type>(Controller::componentNamed(data["TypeID"]));
+				return type->newInstance();
+			}
+		}
+	}
+
+	return nullptr;
 }

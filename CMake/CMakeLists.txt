@@ -11,9 +11,14 @@ endif()
 
 project ("Event Horizon")
 
-set(SOURCES "ai.h"
+set(SOURCES
+    "ai.cpp"
+    "ai.h"
     "asteroid.cpp"
     "asteroid.h"
+    "background.cpp"
+    "background.h"
+    "cargo.h"
     "controller.cpp"
     "controller.h"
     "coord.cpp"
@@ -30,6 +35,7 @@ set(SOURCES "ai.h"
     "mission.h"
     "mod.cpp"
     "mod.h"
+    "obj.cpp"
     "obj.h"
     "object3D.cpp"
     "object3D.h"

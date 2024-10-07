@@ -28,7 +28,7 @@ Sphere::Sphere(int slices, int stacks) {
 
 	// calculate indices
 	numIndices = 6 * slices * (stacks - 1);
-	unsigned int* indices = (unsigned int*)calloc(numIndices, sizeof(unsigned int));
+	unsigned int* indices = new unsigned int[numIndices];
 	index = 0;
 	for( int i = 1; i <= slices; i++ ) {
 		indices[index++] = 0;

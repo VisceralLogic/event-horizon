@@ -11,7 +11,7 @@ class Type;
 
 using json = nlohmann::json;
 
-class Solarsystem : public EHObject, enable_shared_from_this<Solarsystem> {
+class Solarsystem : public EHObject, public enable_shared_from_this<Solarsystem> {
 public:
 	float x, z;
 	string name;
@@ -22,7 +22,7 @@ public:
 	string description;			// description of this sytem for map
 	int asteroids;					// number of asteroids in system
 	shared_ptr<Government> gov;				// which government this system belongs to
-	Type *types;					// which ships should appear in this system
+	shared_ptr<Type> types;					// which ships should appear in this system
 	int backdrops;					// number of backdrops, max of 4
 	int backdropAngle[4];			// angle for each backdrop
 	int backdropElev[4];			// elevation in pixels

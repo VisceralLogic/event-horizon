@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace std;
 
@@ -88,13 +89,13 @@ void GLShaderProgram::setUniformf(const string& name, float value) {
 	glUniform1f(location, value);
 }
 
-void GLShaderProgram::setUniformMat4(const string& name, const float* value) {
+void GLShaderProgram::setUniformMat4(const string& name, glm::mat4& mat) {
 	GLint location = glGetUniformLocation(program, name.c_str());
 	if (location == -1) {
 		cerr << "Uniform " << name << " not found" << endl;
 		return;
 	}
-	glUniformMatrix4fv(location, 1, GL_FALSE, value);
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void GLShaderProgram::setUniform3f(const string& name, float v0, float v1, float v2) {

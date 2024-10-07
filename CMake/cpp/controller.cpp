@@ -2,15 +2,15 @@
 #include <fstream>
 #include <iostream>
 #include <filesystem>
-#include <glm/gtc/type_ptr.hpp>
 #include <nlohmann/json.hpp>
+#include <random>
+#include <glm/ext/matrix_transform.hpp>
 
 #include <freetype-gl/freetype-gl.h>
 #include <freetype-gl/vertex-buffer.h>
 #include <freetype-gl/vertex-attribute.h>
 
 #include "shader.h"
-
 #include "controller.h"
 #include "ai.h"
 #include "plugin.h"
@@ -22,8 +22,9 @@
 #include "mod.h"
 #include "weapon.h"
 #include "type.h"
+#include "background.h"
 
-#define sqr(x) ((x)*(x))
+#define NEWPRESS(key) (keyMap[key] && !oldKeys[key])
 
 using json = nlohmann::json;
 
@@ -136,9 +137,21 @@ void Controller::initialize() {
 		"	vec3 specular = specularStrength * spec * vec3(1.0);"
 		// result
 		//"	vec4 sample = texture(text, TexCoords);\n"
-		"	color = vec4(ambient + diffuse + specular, 1.0);\n"
+		"	color = vec4(1.0);\n"
+		//"	color = vec4(ambient + diffuse + specular, 1.0);\n"
 		"}\n";
 	shader = new GLShaderProgram(shaderVertSource, shaderFragSource);
+}
+
+void Controller::drawObject(SpaceObject *o) {
+	shader->use();
+	glm::mat4 view = glm::lookAt(pos, pos + vForward, vUp);
+	glm::mat4 model = glm::lookAt(o->pos, o->pos + o->vForward, o->vUp);
+	model = glm::scale(model, glm::vec3(o->size));
+	shader->setUniformMat4("view",view);
+	shader->setUniformMat4("model", model);
+	shader->setUniformMat4("projection", GLShaderProgram::perspective);
+	o->draw();
 }
 
 void Controller::initPlugins() {
@@ -153,6 +166,33 @@ void Controller::initPlugins() {
 	for (const string& file : files) {
 		string plugin = file.substr(file.find_last_of(filesystem::path::preferred_separator) + 1);
 		initDataFor(plugin);
+	}
+	// finalize plugins
+	for (const auto& plugin : Plugin::plugins) {
+		for( auto& gov : plugin.second->governments ) {
+			gov.second->finalize();
+		}
+		for( auto& mission : plugin.second->missions ) {
+			mission.second->finalize();
+		}
+		for( auto& mod : plugin.second->mods ) {
+			mod.second->finalize();
+		}
+		for( auto& planet : plugin.second->planets ) {
+			planet.second->finalize();
+		}
+		for( auto& type : plugin.second->types ) {
+			type.second->finalize();
+		}
+		for( auto& ship : plugin.second->spaceships ) {
+			ship.second->finalize();
+		}
+		for( auto& weapon : plugin.second->weapons ) {
+			weapon.second->finalize();
+		}
+		for( auto& system : plugin.second->solarsystems ) {
+			system.second->finalize();
+		}
 	}
 }
 
@@ -219,10 +259,11 @@ Controller::Controller(string name, bool isNew) {
 	GRAVITY = 1;
 	t = 0;
 	hyperTime = 0;
-	x = 0;
-	z = -12;
-	speedx = speedz = deltaRot = 0;
-	angle = 0;
+	pos.x = 0;
+	pos.z = -12;
+	pos.y = 0;
+	velocity = glm::vec3(0);
+	deltaRot = 0;
 	texNum = NUM_TEXTURES;
 	texture.resize(texNum);
 	initPlugins();
@@ -258,6 +299,7 @@ Controller::Controller(string name, bool isNew) {
 	systemIndex = -1;
 	messageTime = 10.;
 	money = 100000;
+	autopilot = false;
 
 /*
 	keyCode prefKey;
@@ -295,11 +337,11 @@ Controller::Controller(string name, bool isNew) {
 	assignKey( CONSOLE, "~" )
 	assignKey( AB, "V" )
 	assignKey( INERTIA, "N" )
-
+*/
 	floatVal[MOUSE] = 1.0f;
 	floatVal[INVERT_Y] = 0.0f;
 	floatVal[SENSITIVITY] = 1.0f;
-
+/*
 	glLightfv( GL_LIGHT1, GL_AMBIENT, ambient );
 	glLightfv( GL_LIGHT1, GL_DIFFUSE, diffuse );
 	glLightfv( GL_LIGHT1, GL_POSITION, lightPos );
@@ -368,54 +410,52 @@ void Controller::setSystem(shared_ptr<Solarsystem> system) {
 }
 
 void Controller::update() {
-	// KeyMap2 keys;
 	int i;
 	string str;
-	double theta = 180 / pi * atan2(z + 1000, x) - angle;
+	double theta = 180 / pi * atan2(pos.z + 1000, pos.x) - angle;
 	bool useMouse = true;
 	vector<SpaceObject*> temp;		// temporary storage of objects to draw
 
 	/*if (FACTOR != 0)
 		threadTime = FACTOR;*/
-	_x = 1000;
-	_y = 0;
-	_z = 0;
-	globalToLocal();
-	lightPos[0] = _x;
-	lightPos[1] = _y;
-	lightPos[2] = _z;
-	if (viewStyle == 1) {		// overhead view lighting
-		lightPos[0] = lightPos[0];
-		lightPos[1] = -lightPos[2];
-		lightPos[2] = 0;
-	}
-	glLightfv(GL_LIGHT1, GL_POSITION, lightPos);
+	//_x = 1000;
+	//_y = 0;
+	//_z = 0;
+	//globalToLocal();
+	//lightPos[0] = _x;
+	//lightPos[1] = _y;
+	//lightPos[2] = _z;
+	//if (viewStyle == 1) {		// overhead view lighting
+	//	lightPos[0] = lightPos[0];
+	//	lightPos[1] = -lightPos[2];
+	//	lightPos[2] = 0;
+	//}
+	//glLightfv(GL_LIGHT1, GL_POSITION, lightPos);
 
-/*	if (t > shipCheckTime) {
-		AI* tempShip = [system->types newInstance];
-		int delta = system->shipCount - [ships count];
-		tempShip->x = 60 - (120.0f * random()) / RAND_MAX;
-		tempShip->z = 60 - (120.0f * random()) / RAND_MAX;
-		tempShip->y = 60 - (120.0f * random()) / RAND_MAX;
-		[ships addObject : tempShip] ;
+	if (t > shipCheckTime) {
+		shared_ptr<AI> tempShip = system->types->newInstance();
+		int delta = system->shipCount - ships.size();
+		tempShip->pos.x = 60 - (120.0f * rand()) / RAND_MAX;
+		tempShip->pos.y = 60 - (120.0f * rand()) / RAND_MAX;
+		tempShip->pos.z = 60 - (120.0f * rand()) / RAND_MAX;
+		ships.push_back(tempShip);
 		if (delta > 0)
 			shipCheckDelta /= 1.5;
 		else if (delta < 0)
 			shipCheckDelta *= 1.5;
 		if (shipCheckDelta < 1)
 			shipCheckDelta = 1;
-		shipCheckTime = t + (shipCheckDelta * random()) / RAND_MAX;
-	}*/
+		shipCheckTime = t + (shipCheckDelta * rand()) / RAND_MAX;
+	}
 
-	/*
-	//	fprintf( stderr, "Controller update\n" );
-#pragma mark Handle Keys
-	getKeys(keys);
+	keyMap = SDL_GetKeyboardState(nullptr);
+	if (oldKeys == nullptr)
+		oldKeys = new Uint8[sizeof(keyMap)];
 
-	killRot = YES;
-	killVertRot = YES;
+	killRot = true;
+	killVertRot = true;
 
-	if ([EHMenu active]) {
+	/*if ([EHMenu active]) {
 		goto updateKeys;	// don't collect input, menu is forefront
 	}
 	if (NEW_PRESS(CONSOLE)) {
@@ -428,11 +468,7 @@ void Controller::update() {
 	if (console) {
 		goto updateKeys;		// if in console, don't use keys
 	}
-#ifdef __ppc__
-	if (keys[1] & 0x2000 && !(oldKeys[1] & 0x2000)) // esc
-#else
-	if (keys[1] & 0x200000 && !(oldKeys[1] & 0x200000)) // esc
-#endif	
+	if( keyMap[SDL_SCANCODE_ESCAPE] )
 		[EHMenu displayMenu : @"Main Menu"];
 	if (NEW_PRESS(PAUSE_KEY))
 		[self pause];
@@ -450,28 +486,28 @@ void Controller::update() {
 	if (keys[index[INVENTORY]] & val[INVENTORY]) {
 		setUpInventory();
 		return;
+	}*/
+	if (keyMap[SDL_SCANCODE_LEFT]) {	// left arrow
+		useMouse = false;
+		left = true;
+		killRot = false;
 	}
-	if (keys[index[LEFT]] & val[LEFT]) {	// left arrow
-		useMouse = NO;
-		left = YES;
-		killRot = NO;
+	else if (oldKeys[SDL_SCANCODE_LEFT]) {
+		killRot = true;
 	}
-	else if (oldKeys[index[LEFT]] & val[LEFT]) {
-		killRot = YES;
+	if (keyMap[SDL_SCANCODE_RIGHT]) {	// right arrow
+		useMouse = false;
+		right = true;
+		killRot = false;
 	}
-	if (keys[index[RIGHT]] & val[RIGHT]) {	// right arrow
-		useMouse = NO;
-		right = YES;
-		killRot = NO;
+	else if (oldKeys[SDL_SCANCODE_RIGHT]) {
+		killRot = true;
 	}
-	else if (oldKeys[index[RIGHT]] & val[RIGHT]) {
-		killRot = YES;
-	}
-	if (keys[index[FORWARD]] & val[FORWARD])	// up arrow
-		forward = YES;
-	if (keys[index[SLOW]] & val[SLOW])	// down arrow
-		slow = YES;
-	if (NEW_PRESS(AUTO))	// autopilot
+	if (keyMap[SDL_SCANCODE_UP])	// up arrow
+		forward = true;
+	if (keyMap[SDL_SCANCODE_DOWN])	// down arrow
+		slow = true;
+	/*if (NEW_PRESS(AUTO))	// autopilot
 		autopilot = !autopilot;
 	if (NEW_PRESS(SELECT)) {	// select next
 		planetIndex++;
@@ -604,9 +640,7 @@ void Controller::update() {
 		*/
 updateKeys:
 
-	if (oldKeys != nullptr) {
-		delete[] oldKeys;
-	}
+	delete[] oldKeys;
 	oldKeys = new Uint8[sizeof(keyMap)];
 	memcpy(oldKeys, keyMap, sizeof(keyMap));
 
@@ -731,7 +765,7 @@ updateKeys:
 
 // Draw Stuff
 	glEnable(GL_BLEND);
-	//[bg draw] ;
+	Background::draw();
 	system->update();
 
 	glEnable(GL_LIGHTING);
@@ -750,7 +784,7 @@ updateKeys:
 				glRotatef(90, 0, 1, 0);
 				glScalef(size, size, size);
 				glBindTexture(GL_TEXTURE_2D, escortee->texture[0]);
-				escortee->drawObject();
+				escortee->draw();
 			}
 		}
 	}
@@ -932,6 +966,21 @@ shared_ptr<EHObject> Controller::componentNamed(const string& name) {
 			return nullptr;
 		return plugin->planets[parts[2]];
 	}
+	else if (parts[1] == "types") {
+		if( plugin->types.count(parts[2]) == 0 )
+			return nullptr;
+		return plugin->types[parts[2]];
+	}
+	else if (parts[1] == "mods") {
+		if (plugin->mods.count(parts[2]) == 0)
+			return nullptr;
+		return plugin->mods[parts[2]];
+	}
+	else if (parts[1] == "weapons") {
+		if (plugin->weapons.count(parts[2]) == 0)
+			return nullptr;
+		return plugin->weapons[parts[2]];
+	}
 	return nullptr;
 }
 
@@ -1041,7 +1090,7 @@ void Controller::drawString(const string& str, float x, float y, float *color) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	stringShader->use();
-	stringShader->setUniformMat4("projection", glm::value_ptr(GLShaderProgram::orthoTransform));
+	stringShader->setUniformMat4("projection", GLShaderProgram::orthoTransform);
 	stringShader->setUniform3fv("textColor", color);
 
 	GLfloat *vertices = new GLfloat[20 * str.size()];
@@ -1117,7 +1166,8 @@ void add_text(GLfloat* vertices, GLuint* indices, texture_font_t* font, const st
 }
 
 void drawGLScene() {
-
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	sys->update();
 }
 
 static void toLower(string& str) {

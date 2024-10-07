@@ -16,16 +16,6 @@ void Weapon::registerFromDictionary(const json& dictionary) {
 	if (dataFile.ends_with("obj") || dataFile.ends_with("OBJ")) {
 		weap->loadOBJ((string)dictionary["Directory"] + dataFile);
 	}
-	else {
-		ifstream fileStream(dataFile);
-		if (!fileStream.is_open()) {
-			return;
-//			throw std::runtime_error("Could not open file: " + dataFile);
-		}
-		stringstream buffer;
-		buffer << fileStream.rdbuf();
-		weap->load(buffer.str().c_str(), (string)dictionary["Directory"] + (string)dictionary["PicturePath"]);
-	}
 	weap->name = dictionary.contains("Name") ? dictionary["Name"] : dictionary["ID"];
 	weap->ID = (string)dictionary["PluginName"] + ".weapons." + (string)dictionary["ID"];
 	weap->ANGULAR_ACCELERATION = dictionary.contains("AngularAcceleration") ? (float)(dictionary["AngularAcceleration"]) : 0;
@@ -35,7 +25,7 @@ void Weapon::registerFromDictionary(const json& dictionary) {
 	weap->mass = dictionary.contains("Mass") ? (int)dictionary["Mass"] : 1;
 	weap->size = dictionary.contains("Size") ? (float)dictionary["Size"] : 1.0f;
 	weap->life = dictionary.contains("Life") ? (float)dictionary["Life"] : 1.0f;
-	weap->isPrimary = dictionary.contains("IsPrimary") ? (bool)dictionary["IsPrimary"] : false;
+	weap->isPrimary = dictionary.contains("Primary") ? (bool)dictionary["Primary"] : false;
 	weap->flags = dictionary.contains("Flags") ? dictionary["Flags"] : empty;
 	weap->description = dictionary.contains("Description") ? dictionary["Description"] : "";
 	weap->price = dictionary.contains("Price") ? (int)dictionary["Price"] : 1000;

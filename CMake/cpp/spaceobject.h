@@ -4,8 +4,11 @@
 #include <vector>
 #include <memory>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 #include "sphere.h"
+
+#define sqr(x) ((x)*(x))
 
 using namespace std;
 
@@ -20,38 +23,34 @@ public:
 	static Sphere* sphereObj;
 	static constexpr double pi = 3.14159265358979323846;
 
-	double MAX_ANGULAR_VELOCITY;		// maximum rate of rotation
-	double ANGULAR_ACCELERATION;		// rate of increase of rotation
-	double ACCELERATION;
-	double MAX_VELOCITY;
+	double MAX_ANGULAR_VELOCITY = 1;		// maximum rate of rotation
+	double ANGULAR_ACCELERATION = 1;		// rate of increase of rotation
+	double ACCELERATION = 0;
+	double MAX_VELOCITY = 1;
 
-	double angle, roll, pitch;		// angle in xz plane, about local z, about local x
-	double deltaPitch, deltaRoll;	// pitch and roll angular velocity
-	double x = 0, y = 0, z = 0;		// cartesian coordinates
-	double speedx, speedy, speedz;	// velocity vector
-	double deltaRot;					// angular velocity
+	glm::vec3 velocity = glm::vec3(0);		// velocity
+	glm::vec3 pos, vUp, vForward, vRight;		// position, up, forward, right vectors
+	double deltaRot = 0, deltaPitch = 0, deltaRoll = 0;					// angular velocities
+	double angle = 0, pitch = 0;
 
 	vector<GLuint> texture;			// array of gl textures
-	int texNum;						// number of textures
+	int texNum = 1;						// number of textures
 
-	float size;						// radius from center
-	int mass;						// mass of object
+	float size = 1;						// radius from center
+	int mass = 1;						// mass of object
 
-	shared_ptr<SpaceObject> centerOfRotation;	// SpaceObject to orbit
-	double distance;					// distance from centerOfRotation
-	double w;						// angular velocity about centerOfRotation
-	double theta;					// angle about centerOfRotation
+	shared_ptr<SpaceObject> centerOfRotation = nullptr;	// SpaceObject to orbit
+	double distance = 0;					// distance from centerOfRotation
+	double w = 0;						// angular velocity about centerOfRotation
+	double theta = 0;					// angle about centerOfRotation
 
-	string name;
+	string name = "<SpaceObject>";
 	//void* initData;					// used to store data between init and finalize
-	string description;			// information about this
-	string flagRequirements;		// flags planet must have for this to be sold there
-	double _x, _y, _z;				// used for rotating vectors from local to global
-	double fX, fY, fZ;				// forward vector in global
-	double rX, rY, rZ;				// right vector in global
-	double uX, uY, uZ;				// up vector in global
+	string description = "";			// information about this
+	string flagRequirements = "";		// flags planet must have for this to be sold there
 
 	static void initialize();
+	SpaceObject();
 	void loadTextures(const vector<string>& files);
 	virtual void bracket();
 	virtual void draw() {}
@@ -69,18 +68,10 @@ public:
 	void bounce(shared_ptr<SpaceObject> sphere);
 	void position();
 	double getDistance(shared_ptr<SpaceObject> other);
-	void localToGlobal();
-	void globalToLocal();
-	void calcAngles();
 	bool visible();
+	glm::vec3 globalToLocal(const glm::vec3& global);
 
 	// useful for scripting
-	double getX();
-	void setX(double x);
-	double getY();
-	void setY(double y);
-	double getZ();
-	void setZ(double z);
 	double getAngularAcceleration();
 	void setAngularAcceleration(double a);
 	double getMaxAngularVelocity();

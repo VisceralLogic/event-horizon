@@ -31,7 +31,7 @@ void Government::registerFromDictionary(const json& dictionary) {
 	vector<string> temp = split(gov->ID, '.');
 	if( !Plugin::plugins.contains(temp[0]) )
 		Plugin::plugins[temp[0]] = make_shared<Plugin>();
-	Plugin::plugins[temp[0]]->governments[temp[1]] = gov;
+	Plugin::plugins[temp[0]]->governments[temp[2]] = gov;
 }
 
 void Government::finalize() {

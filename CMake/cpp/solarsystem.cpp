@@ -6,14 +6,14 @@
 #include "plugin.h"
 #include "type.h"
 #include "government.h"
+#include "background.h"
 
 GLuint backdrop[4];
 int backdropWidth[4];
 int backdropHeight[4];
 
 void Solarsystem::setUp() {
-	int i, j = 0;
-
+	int i;
 
 	displayOnMap = true;
 	sys->selection = nullptr;
@@ -25,30 +25,36 @@ void Solarsystem::setUp() {
 	sys->ships.push_back(shared_ptr<Spaceship>(sys));
 	sys->weaps.clear();
 	sys->asteroids.clear();
+	for( GLuint& tex : sys->planetTex ) {
+		glDeleteTextures(1, &tex);
+	}
+	sys->planetTex.clear();
 	for (i = 0; i < planets.size(); i++) {
 		shared_ptr<Planet> planet = planets[i];
 		if (!planet->model) {
-			Texture::loadTexture(planet->texFile.c_str(), &sys->planetTex[i], nullptr, nullptr);
-			planet->texture[0] = sys->planetTex[i];
+			sys->planetTex.push_back(0);
+			Texture::loadTexture(planet->texFile.c_str(), &sys->planetTex.back(), nullptr, nullptr);
+			planet->texture[0] = sys->planetTex.back();
 			if (planet->ringSize != 0) {
-				Texture::loadTexture(planet->ringTex.c_str(), &sys->planetTex[planets.size() + j], nullptr, nullptr);
-				planet->texture[1] = sys->planetTex[planets.size() + j++];
+				sys->planetTex.push_back(0);
+				Texture::loadTexture(planet->ringTex.c_str(), &sys->planetTex.back(), nullptr, nullptr);
+				planet->texture[1] = sys->planetTex.back();
 			}
 			if (planet->atmosSize != 0) {
-				Texture::loadTexture(planet->atmosTex.c_str(), &sys->planetTex[planets.size() + j], nullptr, nullptr);
-				planet->texture[2] = sys->planetTex[planets.size() + j++];
+				sys->planetTex.push_back(0);
+				Texture::loadTexture(planet->atmosTex.c_str(), &sys->planetTex.back(), nullptr, nullptr);
+				planet->texture[2] = sys->planetTex.back();
 			}
 		}
 	}
-	// autorelease old planets
 	sys->planets = planets;
-	/*for (i = 0; i < shipCount; i++) {
-		AI* tempShip = [types newInstance];
-		tempShip->x = 60.0f - (120.0f * random()) / RAND_MAX;
-		tempShip->z = 60.0f - (120.0f * random()) / RAND_MAX;
-		tempShip->y = 60.0f - (120.0f * random()) / RAND_MAX;
-		[sys->ships addObject : tempShip] ;
-	}*/
+	for (i = 0; i < shipCount; i++) {
+		shared_ptr<AI> tempShip = types->newInstance();
+		tempShip->pos.x = 60.0f - (120.0f * rand()) / RAND_MAX;
+		tempShip->pos.z = 60.0f - (120.0f * rand()) / RAND_MAX;
+		tempShip->pos.y = 60.0f - (120.0f * rand()) / RAND_MAX;
+		sys->ships.push_back(tempShip);
+	}
 	for (i = 0; i < asteroids; i++) {
 		sys->asteroids.push_back(shared_ptr<Asteroid>(new Asteroid()));
 	}
@@ -57,6 +63,7 @@ void Solarsystem::setUp() {
 	}
 	if (!sys->systems.count(ID))
 		sys->systems.emplace(ID);
+	Background::generate(0.2f);
 }
 
 void Solarsystem::registerFromDictionary(const json& dictionary) {
@@ -124,10 +131,10 @@ void Solarsystem::finalize() {
 		gov = static_pointer_cast<Government>(Controller::componentNamed(initData["Government"]));
 	}
 
-	shared_ptr<Type> types = make_shared<Type>();
+	types = make_shared<Type>();
 	types->initData = initData["ShipTypes"];
 
-	initData.clear();
+	//initData.clear();
 }
 
 void Solarsystem::update() {
@@ -135,7 +142,7 @@ void Solarsystem::update() {
 
 	if (sys->viewStyle == 1)
 		return;
-	glDisable(GL_DEPTH_TEST);
+	/*glDisable(GL_DEPTH_TEST);
 	glColor3f(1, 1, 1);
 	glLoadIdentity();
 	if (sys->viewStyle == 0) {
@@ -171,9 +178,8 @@ void Solarsystem::update() {
 		glVertex3f(-xSize, ySize, -back);
 		glEnd();
 	}
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);*/
 }
 
 Solarsystem::~Solarsystem() {
-	delete types;
 }

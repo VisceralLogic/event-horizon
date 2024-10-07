@@ -16,13 +16,13 @@ class Government;
 class Spaceship : public Object3D, public EHObject {
 public:
 	bool left, right, forward, slow, autopilot, orbit, hyperspace, land, fire, fireSecondary, up, down, throttleUp, throttleDown, afterburner;
-	Planet* curPlanet;				// selected planet
-	AI* selection;					// selected spaceship
+	shared_ptr<Planet> curPlanet;				// selected planet
+	shared_ptr<AI> selection;					// selected spaceship
 	float hyperTime;				// powering up for hyper jump
 	int cargoSpace;					// max room for cargo
 	int modSpace;					// room for mods;
 	vector<shared_ptr<Mod>> mods;			// array of mods
-	vector<shared_ptr<Cargo>> cargo;			// array of current cargos
+	vector<Cargo> cargo;			// array of current cargos
 	int money;						// how much money the ship has
 	vector<shared_ptr<Weapon>> weapons;		// array of weapons
 	int secondaryIndex;				// which secondary weapon is selected
@@ -44,8 +44,8 @@ public:
 	vector<shared_ptr<Weapon>> secondary;		// array of secondary weapon launchers
 	vector<Coord> primaryStraight, primaryTurret, secondaryStraight, secondaryTurret;
 	// array of hardpoints to fire weapons from
-	Spaceship* escortee;			// spaceship to escort
-	vector<AI*> escorts;		// array of escorting ships
+	shared_ptr<Spaceship> escortee;			// spaceship to escort
+	vector<shared_ptr<AI>> escorts;		// array of escorting ships
 	string weaponID;				// ID of weapon, if bay-launched
 	bool bound;						// strict escortee control
 	float compensation;				// amount of inertial compensation
@@ -83,4 +83,6 @@ public:
 	void bracket();
 	void throttle(bool forward);
 	void doAfterburner();
+
+	static const float jumpDistance;
 };

@@ -95,12 +95,11 @@ public:
 	int planetIndex;
 	int shipIndex;
 
-	float FACTOR;	// multiply by for varying FPS
-	map<string, shared_ptr<Plugin>> plugins;
+	float FACTOR = 0;	// multiply by for varying FPS
 	float GRAVITY;
 	int screenWidth, screenHeight;
 	float t;
-	GLuint planetTex[16];
+	vector<GLuint> planetTex;
 
 	int index[END_OF_KEYS];
 	int val[END_OF_KEYS];
@@ -111,7 +110,7 @@ public:
 	float shipCheckTime;			// when to check to see if new ships should be added to system
 	float shipCheckDelta;			// how much to increase shipCheckTime
 	chrono::system_clock::time_point date;					// game date
-	bool pause;						// pause the game
+	bool pause = false;						// pause the game
 	map<int, int> govRecord;	// key: gov ID, value: number reflecting position with regard to that government
 	float floatVal[END_OF_FLOATS];		// pref values stored here
 	int combatRating;				// combat experience rating
@@ -148,6 +147,7 @@ public:
 	void drawFrame();
 	void drawSelectionTab(int pos);
 	void drawInfoTab();
+	void drawObject(SpaceObject *o);
 
 	static void drawString(const string& str, float x, float y, float *color);
 	static vector<shared_ptr<EHObject>> objectsOfType(const string& type);

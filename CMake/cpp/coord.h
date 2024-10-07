@@ -9,10 +9,6 @@ public:
 	Coord(double x, double y, double z, double u, double v);
 	Coord(const Coord &coord);
 
-	void makeOBJTex();
-	void makeTexCoord();
-	void makeVertex();
-	void makeNormal();
 	double xzDistance(Coord* c);
 	double xyDistance(Coord* c);
 	double yzDistance(Coord* c);

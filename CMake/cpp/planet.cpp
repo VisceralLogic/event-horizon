@@ -13,12 +13,8 @@ void Planet::registerFromDictionary(const json& dictionary) {
 	shared_ptr<Planet> planet = make_shared<Planet>();
 	json empty;
 	if( dictionary.contains("Coords") && dictionary["Coords"].is_array() ) {
-		planet->x = dictionary["Coords"][0];
-		planet->y = dictionary["Coords"][1];
-	}
-	else {
-		planet->x = 0;
-		planet->y = 0;
+		planet->pos.x = dictionary["Coords"][0];
+		planet->pos.y = dictionary["Coords"][1];
 	}
 	planet->name = dictionary.contains("Name") ? (string)dictionary["Name"] : (string)dictionary["ID"];
 	planet->ID = (string)dictionary["PluginName"] + ".planets." + (string)dictionary["ID"];

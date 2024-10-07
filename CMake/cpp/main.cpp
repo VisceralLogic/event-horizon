@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL_filesystem.h>
+#include <SDL_image.h>
 #include <glad/glad.h>
 //#include <GL/glu.h>
 #include <chrono>
@@ -12,6 +13,7 @@
 #include "player.h"
 #include "shader.h"
 #include "planet.h"
+#include "background.h"
 
 SDL_Window* window;
 SDL_GLContext context;
@@ -19,6 +21,7 @@ SDL_Rect displayBounds;
 const Uint8* keyMap;
 Uint8* oldKeys = nullptr;
 int oldMouseX, oldMouseY;
+Uint64 t1, u1;
 
 void initGL() {
     glViewport(0, 0, gScreenWidth, gScreenHeight);
@@ -74,6 +77,8 @@ bool setup() {
         return 1;
     }
 
+    int flags = IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG | IMG_INIT_TIF);
+
     initGL();
 
     SpaceObject::initialize();
@@ -81,8 +86,11 @@ bool setup() {
     GLShaderProgram::initialize();
     EHButton::initialize();
     Planet::initialize();
+	Background::initialize();
 
     beginPlayer();
+
+	u1 = SDL_GetTicks64();
 
     return true;
 }
@@ -105,6 +113,19 @@ void cleanUp(){
 void doUpdate() {
     drawScene();
     SDL_GL_SwapWindow(window);
+
+	if (sys != nullptr) {
+        t1 = SDL_GetTicks64();
+		sys->FACTOR = (t1 - u1) / 1000.0f;
+		u1 = t1;
+        if (sys->pause)
+            sys->FACTOR = 0;
+        if (sys->t == 0) {
+            sys->t = 0.01f;
+            sys->FACTOR = 0;
+        } else 
+			sys->t += sys->FACTOR;
+	}
 }
 
 void eventLoop() {

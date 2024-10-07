@@ -2,31 +2,27 @@
 #include "coord.h"
 #include <vector>
 #include <string>
+#include <glad/glad.h>
+#include <memory>
 
 using namespace std;
 
 class OBJ {
 public:
-	vector<Coord*> vertices;
-	vector<Coord*> normals;
-	vector<Coord*> uvCoords;
-	vector<vector<Coord*>> faces;
+	vector<shared_ptr<Coord>> vertices;
+	vector<shared_ptr<Coord>> normals;
+	vector<shared_ptr<Coord>> uvCoords;
+	vector<vector<shared_ptr<Coord>>> faces;
 	string name;
 	string mtllib;
 	string mtl;
 	unsigned long texture;
 	bool smooth = false;
+	GLuint VBO, VAO;
+	GLuint material;
+	int triangles;
 
-	~OBJ() {
-		for( int i = 0; i < vertices.size(); i++ )
-			delete vertices[i];
-		for( int i = 0; i < normals.size(); i++ )
-			delete normals[i];
-		for( int i = 0; i < uvCoords.size(); i++ )
-			delete uvCoords[i];
-		for( int i = 0; i < faces.size(); i++ ) {
-			for( int j = 0; j < faces[i].size(); j++ )
-				delete faces[i][j];
-		}
-	}
+	~OBJ();
+	void generateBuffers();
+	static const Coord& normalize(const shared_ptr<Coord>& a, const shared_ptr<Coord>& b, const shared_ptr<Coord>& c);
 };

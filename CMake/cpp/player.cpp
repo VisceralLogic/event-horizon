@@ -97,7 +97,7 @@ void beginPlayer() {
 
 	logoShader = new GLShaderProgram(vertexShader, fragmentShader);
 	logoShader->use();
-	logoShader->setUniformMat4("transform", glm::value_ptr(GLShaderProgram::orthoTransform));
+	logoShader->setUniformMat4("transform", GLShaderProgram::orthoTransform);
 
 	glGenVertexArrays(1, &logoVAO);
 	glBindVertexArray(logoVAO);

@@ -1,6 +1,5 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 #include "ehbutton.h"
@@ -45,7 +44,7 @@ void EHButton::initialize() {
 
 	shader = new GLShaderProgram(vertexShader, fragmentShader);
 	shader->use();
-	shader->setUniformMat4("transform", glm::value_ptr(GLShaderProgram::orthoTransform));
+	shader->setUniformMat4("transform", GLShaderProgram::orthoTransform);
 
 	float leftVertices[] = {
 		0, 0, 0, 0, 0,
