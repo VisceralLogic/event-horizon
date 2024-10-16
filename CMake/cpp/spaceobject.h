@@ -25,7 +25,7 @@ public:
 
 	double MAX_ANGULAR_VELOCITY = 1;		// maximum rate of rotation
 	double ANGULAR_ACCELERATION = 1;		// rate of increase of rotation
-	double ACCELERATION = 0;
+	double ACCELERATION = 1;
 	double MAX_VELOCITY = 1;
 
 	glm::vec3 velocity = glm::vec3(0);		// velocity
@@ -54,6 +54,7 @@ public:
 	void loadTextures(const vector<string>& files);
 	virtual void bracket();
 	virtual void draw() {}
+	virtual void update() {}
 	void setOrbit(shared_ptr<SpaceObject> center);
 	
 	template<typename SO>

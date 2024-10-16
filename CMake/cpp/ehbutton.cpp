@@ -21,7 +21,7 @@ void EHButton::initialize() {
 	Texture::loadTexture(Controller::basePath + "Images/Button.png", &buttonTex, &tempWidth, &tempHeight);
 
 	string vertexShader = "#version 330 core\n"
-		"layout(location = 0) in vec3 pos;\n"
+		"layout(location = 0) in vec2 pos;\n"
 		"layout(location = 1) in vec2 tex;\n"
 		"out vec2 TexCoord;\n"
 		"uniform mat4 transform;\n"
@@ -30,7 +30,7 @@ void EHButton::initialize() {
 		"uniform float yOffset;\n"
 		"uniform float delta;\n"
 		"void main() {\n"
-		"	gl_Position = transform * vec4(pos.x * width + xOffset, pos.y + yOffset, pos.z, 1.0);\n"
+		"	gl_Position = transform * vec4(pos.x * width + xOffset, pos.y + yOffset, 0.0, 1.0);\n"
 		"	TexCoord = vec2(tex.x, tex.y+delta);\n"
 		"}\n";
 
@@ -47,24 +47,24 @@ void EHButton::initialize() {
 	shader->setUniformMat4("transform", GLShaderProgram::orthoTransform);
 
 	float leftVertices[] = {
-		0, 0, 0, 0, 0,
-		1, 0, 0, .25, 0,
-		1, 32, 0, .25, -.25,
-		0, 32, 0, 0, -.25
+		0, 0, 0, 0,
+		1, 0, .25, 0,
+		1, 32, .25, -.25,
+		0, 32, 0, -.25
 	};
 
 	float midVertices[] = {
-		0, 0, 0, .25, 0,
-		1, 0, 0, .75, 0,
-		1, 32, 0, .75, -.25,
-		0, 32, 0, .25, -.25
+		0, 0, .25, 0,
+		1, 0, .75, 0,
+		1, 32, .75, -.25,
+		0, 32, .25, -.25
 	};
 
 	float rightVertices[] = {
-		0, 0, 0, .75, 0,
-		1, 0, 0, 1, 0,
-		1, 32, 0, 1, -.25,
-		0, 32, 0, .75, -.25
+		0, 0, .75, 0,
+		1, 0, 1, 0,
+		1, 32, 1, -.25,
+		0, 32, .75, -.25
 	};
 
 	GLuint indices[] = {
@@ -79,9 +79,9 @@ void EHButton::initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, leftVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(leftVertices), leftVertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
 	glGenBuffers(1, &leftEBO);
@@ -95,9 +95,9 @@ void EHButton::initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, midVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(midVertices), midVertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
 	glGenBuffers(1, &midEBO);
@@ -111,9 +111,9 @@ void EHButton::initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, rightVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rightVertices), rightVertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
 	glGenBuffers(1, &rightEBO);

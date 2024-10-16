@@ -30,7 +30,7 @@ public:
 	float atmosAmbient[4];			// atmosphere ambient light
 	shared_ptr<Solarsystem> system;			// which system this planet belongs to
 
-	static Sphere* planetSphere;
+	static Sphere* sphere;
 
 	Planet();
 	~Planet();
@@ -38,6 +38,9 @@ public:
 	static void initialize();
 	static void registerFromDictionary(const json& dictionary);
 	void finalize();
+	void draw();
+	void update();
+	void orbit();
 
 	static void setUpPlanet();
 	static void drawPlanet();

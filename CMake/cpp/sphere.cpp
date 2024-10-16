@@ -9,20 +9,20 @@ using namespace std;
 constexpr double M_PI = 3.14159265358979323846;
 
 Sphere::Sphere(int slices, int stacks) {
-	int numVertices = slices * (stacks - 1) + 2;
+	int numVertices = (slices+1) * (stacks - 1) + 2;
 
 	float* vertices = new float[8 * numVertices];
 
-	setVertex(vertices, 0, 0, 1, 0, 0, 1, 0, 0.5, 1);
-	setVertex(vertices, numVertices-1, 0, -1, 0, 0, -1, 0, 0.5, 0);
+	setVertex(vertices, 0, 0, 1, 0, 0.5, 1);
+	setVertex(vertices, numVertices-1, 0, -1, 0, 0.5, 0);
 
 	float phi, theta;
 	int index = 1;
 	for (int i = 1; i < stacks; i++) {
 		phi = M_PI * i / stacks;
-		for (int j = 0; j < slices; j++) {
+		for (int j = 0; j <= slices; j++) {
 			theta = 2 * M_PI * j / slices;
-			setVertex(vertices, index++, sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta), sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta), (float)j / slices, 1 - (float)i / stacks);
+			setVertex(vertices, index++, sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta), (float)j / slices, 1 - (float)i / stacks);
 		}	
 	}
 
@@ -31,25 +31,25 @@ Sphere::Sphere(int slices, int stacks) {
 	unsigned int* indices = new unsigned int[numIndices];
 	index = 0;
 	for( int i = 1; i <= slices; i++ ) {
-		indices[index++] = 0;
 		indices[index++] = i;
-		indices[index++] = ((i+slices) % slices) + 1;
+		indices[index++] = 0;
+		indices[index++] = i + 1;
 	}
 	for( int i = 0; i < stacks - 2; i++ ) {
 		for( int j = 1; j <= slices; j++ ) {
-			indices[index++] = j + slices * i;
-			indices[index++] = j + slices + slices * i;
-			indices[index++] = ((j + slices) % slices) + 1 + slices * i;		
+			indices[index++] = j + (slices + 1) * (i + 1);
+			indices[index++] = j + (slices+1) * i;
+			indices[index++] = j + (slices+1) * (i+1) + 1;		
 
-			indices[index++] = ((j + slices) % slices) + 1 + slices * i;
-			indices[index++] = j + slices + slices * i;
-			indices[index++] = ((j + slices) % slices) + 1 + slices + slices * i;
+			indices[index++] = j + (slices + 1) * (i + 1) + 1;
+			indices[index++] = j + (slices+1) * i;
+			indices[index++] = j + (slices + 1) * i + 1;
 		}
 	}
 	for( int i = 1; i <= slices; i++ ) {
+		indices[index++] = numVertices - (i + 1);
 		indices[index++] = numVertices - 1;
-		indices[index++] = numVertices - (i+1);
-		indices[index++] = numVertices - ((i + slices)%slices+2);
+		indices[index++] = numVertices - (i+2);
 	}
 
 	// create vao, vbo, and ebo
@@ -88,13 +88,13 @@ void Sphere::draw() {
 	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
 }
 
-void Sphere::setVertex(float *vertices, int index, float x, float y, float z, float nx, float ny, float nz, float u, float v) {
+void Sphere::setVertex(float *vertices, int index, float x, float y, float z, float u, float v) {
 	vertices[index * 8] = x;
 	vertices[index * 8 + 1] = y;
 	vertices[index * 8 + 2] = z;
-	vertices[index * 8 + 3] = nx;
-	vertices[index * 8 + 4] = ny;
-	vertices[index * 8 + 5] = nz;
+	vertices[index * 8 + 3] = x;
+	vertices[index * 8 + 4] = y;
+	vertices[index * 8 + 5] = z;
 	vertices[index * 8 + 6] = u;
 	vertices[index * 8 + 7] = v;
 }

@@ -1,11 +1,12 @@
 #include "planet.h"
 #include "controller.h"
 #include "plugin.h"
+#include <glm/ext/matrix_transform.hpp>
 
-Sphere* Planet::planetSphere;
+Sphere* Planet::sphere;
 
 void Planet::initialize() {
-	planetSphere = new Sphere(20, 20);
+	sphere = new Sphere(20, 20);
 	// load sounds
 }
 
@@ -14,7 +15,7 @@ void Planet::registerFromDictionary(const json& dictionary) {
 	json empty;
 	if( dictionary.contains("Coords") && dictionary["Coords"].is_array() ) {
 		planet->pos.x = dictionary["Coords"][0];
-		planet->pos.y = dictionary["Coords"][1];
+		planet->pos.z = dictionary["Coords"][1];
 	}
 	planet->name = dictionary.contains("Name") ? (string)dictionary["Name"] : (string)dictionary["ID"];
 	planet->ID = (string)dictionary["PluginName"] + ".planets." + (string)dictionary["ID"];
@@ -86,4 +87,41 @@ Planet::~Planet() {
 	for( int i = 0; i < texNum; i++ ) {
 		glDeleteTextures(1, &texture[i]);
 	}
+}
+
+void Planet::draw() {
+	//if (!visible())
+	//	return;
+	if (model) {
+		model->draw();
+	}
+	else {
+		glBindTexture(GL_TEXTURE_2D, texture[0]);
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, pos);
+		model = glm::rotate(model, float((pitch + 180) * pi / 180), glm::vec3(1, 0, 0));
+		model = glm::rotate(model, float(angle * pi / 180), glm::vec3(0, 1, 0));	
+		model = glm::scale(model, glm::vec3(size));
+		Controller::shader->setUniformMat4("model", model);
+		sphere->draw();
+	}
+}
+
+void Planet::update() {
+	if (centerOfRotation) {
+		orbit();
+	}
+	angle += deltaRot*sys->FACTOR;
+	atmosRot += atmosSpeed * sys->FACTOR;
+}
+
+void Planet::orbit() {
+	theta += w * sys->FACTOR;
+	if (theta > 360)
+		theta -= 360;
+	else if (theta < 0)
+		theta += 360;
+	pos.x = centerOfRotation->pos.x + distance*cos(theta*pi/180);
+	pos.y = centerOfRotation->pos.y + distance*sin(theta*pi/180)*sin(inclination);
+	pos.z = centerOfRotation->pos.z + distance*sin(theta*pi/180)*cos(inclination);
 }

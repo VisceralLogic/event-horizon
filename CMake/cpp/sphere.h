@@ -6,7 +6,7 @@ class Sphere {
 	GLuint vao, vbo, ebo;
 	int numIndices;
 
-	void setVertex(float *vertices, int index, float x, float y, float z, float nx, float ny, float nz, float u, float v);
+	void setVertex(float *vertices, int index, float x, float y, float z, float u, float v);
 
 public:
 	Sphere(int slices, int stacks);

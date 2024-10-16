@@ -101,6 +101,8 @@ void Solarsystem::registerFromDictionary(const json& dictionary) {
 	else {
 		system->backdrops = 0;
 	}
+	system->lightDir = dictionary.contains("LightDir") ? glm::vec3(dictionary["LightDir"][0], dictionary["LightDir"][1], dictionary["LightDir"][2]) : glm::vec3(1, 0, 0);
+	system->ambient = dictionary.contains("Ambient") ? glm::vec3(dictionary["Ambient"][0], dictionary["Ambient"][1], dictionary["Ambient"][2]) : glm::vec3(0.15f);
 	system->displayOnMap = false;
 	if (dictionary.contains("Replace"))
 		system->ID = dictionary["Replace"];

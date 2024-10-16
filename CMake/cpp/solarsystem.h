@@ -28,6 +28,8 @@ public:
 	int backdropElev[4];			// elevation in pixels
 	vector<string> backdropPath;		// path to backdrop graphic
 	bool displayOnMap;				// show system info on map
+	glm::vec3 lightDir;				// direction of light source
+	glm::vec3 ambient;				// ambient light
 
 	~Solarsystem();
 	static void registerFromDictionary(const json& dictionary);

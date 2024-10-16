@@ -79,6 +79,7 @@ enum {					// pref float values
 class Controller : public Spaceship {
 protected:
 	static GLShaderProgram* stringShader;
+	static GLShaderProgram* frameShader;
 
 public:
 	static GLShaderProgram* shader;
@@ -101,22 +102,21 @@ public:
 	float t;
 	vector<GLuint> planetTex;
 
-	int index[END_OF_KEYS];
-	int val[END_OF_KEYS];
+	Uint8* keys;					// key codes
 	//Background* bg;					// draws stars
 	int systemIndex;				// which system is selected
 	vector<shared_ptr<Solarsystem>> itinerary;		// systems to travel to
-	int viewStyle;					// forward, top, back
+	int viewStyle = 0;					// forward, top, back
 	float shipCheckTime;			// when to check to see if new ships should be added to system
 	float shipCheckDelta;			// how much to increase shipCheckTime
 	chrono::system_clock::time_point date;					// game date
-	bool pause = false;						// pause the game
+	bool paused = false;						// pause the game
 	map<int, int> govRecord;	// key: gov ID, value: number reflecting position with regard to that government
 	float floatVal[END_OF_FLOATS];		// pref values stored here
 	int combatRating;				// combat experience rating
 	//FSInterpreter* interpreter;		// use for FScripts
 	bool console;					// is console visible
-	GLuint frameFront, frameRear;	// frame display lists
+	GLuint frameVBO, frameVAO, frameEBO, squareVBO, squareVAO;	// frame buffers
 	set<string> systems;		// visited systems
 
 	static string basePath;
@@ -140,6 +140,7 @@ public:
 	void doHyperspace();
 	void doLand();
 	bool functionKey();	// utility function to see if "map" or "inventory" key pressed"
+	void pause();
 
 	// graphics
 	void setUpFrame();
@@ -155,9 +156,6 @@ public:
 };
 
 void drawGLScene();
-void beginOrtho();
-void endOrtho();
-void drawString(string str, float x, float y);
 vector<string> split(const string& str, char c);
 string replace(const string& str, const string& find, const string& replace);
 extern void (*drawScene)(void);

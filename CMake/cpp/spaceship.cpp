@@ -179,13 +179,26 @@ void Spaceship::update() {
 	if (centerOfRotation)		// if we're orbiting...
 		doOrbit();
 
-	glm::mat4 rot = glm::rotate(glm::mat4(1.0f), (float)deltaRot * sys->FACTOR, vUp);
+	pos += velocity * sys->FACTOR;
+
+	// handle jitter
+	jitterPitch = jitter * (0.5f - rand() * 1.0f / RAND_MAX);
+	jitterRot = jitter * (0.5f - rand() * 1.0f / RAND_MAX);
+	jitter *= exp(-4.6 * sys->FACTOR);
+
+	glm::mat4 rot = glm::rotate(glm::mat4(1.0f), (float)deltaRot * sys->FACTOR + jitterRot, vUp);
 	vRight = rot * glm::vec4(vRight, 1);
 	vForward = rot * glm::vec4(vForward, 1);
-	rot = glm::rotate(glm::mat4(1.0f), (float)deltaPitch * sys->FACTOR, vRight);
+	rot = glm::rotate(glm::mat4(1.0f), (float)deltaPitch * sys->FACTOR + jitterPitch, vRight);
 	vUp = rot * glm::vec4(vUp, 1);
 	vForward = rot * glm::vec4(vForward, 1);
-	pos += velocity * sys->FACTOR;
+	// ensure vectors are orthogonal
+	vRight = glm::cross(vForward, vUp);
+	vUp = glm::cross(vRight, vForward);
+	// normalize vectors
+	vForward = glm::normalize(vForward);
+	vRight = glm::normalize(vRight);
+	vUp = glm::normalize(vUp);
 
 	collide(sys->planets);
 	collide(sys->ships);
@@ -219,17 +232,6 @@ void Spaceship::update() {
 		goForward();
 	}
 
-	// handle jitter
-	jitterPitch = jitter * (0.5 - rand() * 1.0 / RAND_MAX);
-	jitterRot = jitter * (0.5 - rand() * 1.0 / RAND_MAX);
-	jitter = jitter * exp(-4.6 * sys->FACTOR);
-	glm::mat4 rotMat = glm::rotate(glm::mat4(1.0f), jitterRot, vUp);
-	vUp = rotMat * glm::vec4(vUp, 1);
-	vForward = rotMat * glm::vec4(vForward, 1);
-	rotMat = glm::rotate(glm::mat4(1.0f), jitterPitch, vRight);
-	vRight = rotMat * glm::vec4(vRight, 1);
-	vForward = rotMat * glm::vec4(vForward, 1);
-
 	if (state == ALIVE) {
 		shields += rechargeRate * sys->FACTOR;
 		if (shields > maxShield)
@@ -258,7 +260,6 @@ void Spaceship::goRight() {
 	deltaRot -= ANGULAR_ACCELERATION * sys->FACTOR;
 	if (deltaRot > 0)
 		deltaRot -= MAX_ANGULAR_VELOCITY * sys->FACTOR;
-
 }
 
 void Spaceship::goForward() {
@@ -302,11 +303,15 @@ void Spaceship::doAfterburner() {
 }
 
 void Spaceship::goUp() {
-
+	deltaPitch += ANGULAR_ACCELERATION * sys->FACTOR;
+	if (deltaPitch < 0)
+		deltaPitch += MAX_ANGULAR_VELOCITY * sys->FACTOR;
 }
 
 void Spaceship::goDown() {
-
+	deltaPitch -= ANGULAR_ACCELERATION * sys->FACTOR;
+	if (deltaPitch > 0)
+		deltaPitch -= MAX_ANGULAR_VELOCITY * sys->FACTOR;
 }
 
 void Spaceship::addMod(shared_ptr<Mod> mod) {

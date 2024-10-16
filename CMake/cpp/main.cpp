@@ -44,8 +44,8 @@ bool setup() {
     }
 
     SDL_GetDisplayBounds(0, &displayBounds);
-    gScreenWidth = 1280;// displayBounds.w;
-    gScreenHeight = 800;// displayBounds.h;
+    gScreenWidth = 1280; // displayBounds.w;
+    gScreenHeight = 800; // displayBounds.h;
 
     // Create a window
     window = SDL_CreateWindow("Event Horizon", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gScreenWidth, gScreenHeight, /*SDL_WINDOW_FULLSCREEN_DESKTOP |*/ SDL_WINDOW_OPENGL);
@@ -116,9 +116,13 @@ void doUpdate() {
 
 	if (sys != nullptr) {
         t1 = SDL_GetTicks64();
+        if (t1 == u1) {
+			SDL_Delay(1);
+			t1 = SDL_GetTicks64();
+        }
 		sys->FACTOR = (t1 - u1) / 1000.0f;
 		u1 = t1;
-        if (sys->pause)
+        if (sys->paused)
             sys->FACTOR = 0;
         if (sys->t == 0) {
             sys->t = 0.01f;

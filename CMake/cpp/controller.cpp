@@ -24,7 +24,7 @@
 #include "type.h"
 #include "background.h"
 
-#define NEWPRESS(key) (keyMap[key] && !oldKeys[key])
+#define NEWPRESS(key) (keyMap[keys[key]] && !oldKeys[keys[key]])
 
 using json = nlohmann::json;
 
@@ -58,6 +58,7 @@ texture_font_t* font;
 string Controller::basePath;
 GLShaderProgram* Controller::stringShader;
 GLShaderProgram* Controller::shader;
+GLShaderProgram* Controller::frameShader;
 
 void Controller::initialize() {
 	basePath = filesystem::current_path().string() + "/";
@@ -89,16 +90,39 @@ void Controller::initialize() {
 
 	string stringFragSource = "#version 330 core\n"
 		"out vec4 color;\n"
-		"uniform sampler2D text;\n"
+		"uniform sampler2D tex;\n"
 		"uniform vec3 textColor;\n"
 		"in vec2 TexCoords;\n"
 		"void main() {\n"
-		"	vec4 sample = texture(text, TexCoords);\n"
+		"	vec4 sample = texture(tex, TexCoords);\n"
 		"	color = vec4(textColor, sample.r);\n"
 		"}\n";
 	stringShader = new GLShaderProgram(stringVertSource, stringFragSource);
 
 	string shaderVertSource = "#version 330 core\n"
+		"layout(location = 0) in vec2 vertex;\n"
+		"layout(location = 1) in vec3 attrib;\n"
+		"out vec3 Attrib;\n"
+		"void main() {\n"
+		"	gl_Position = vec4(vertex.x, vertex.y, 0.0, 1.0);\n"
+		"	Attrib = attrib;\n"
+		"}\n";
+	string shaderFragSource = "#version 330 core\n"
+		"out vec4 Color;\n"
+		"in vec3 Attrib;\n"
+		"uniform float useTexture;\n"
+		"uniform vec3 color;\n"
+		"uniform sampler2D tex;\n"
+		"void main() {\n"
+		"	if( useTexture == 0.0 ){\n"
+		"		Color = vec4(Attrib, 1.0);\n"
+		"	} else {\n"
+		"		Color = vec4(color, 1.0) * texture(tex, vec2(Attrib.x, Attrib.y));\n"
+		"	}\n"
+		"}\n";
+	frameShader = new GLShaderProgram(shaderVertSource, shaderFragSource);
+
+	shaderVertSource = "#version 330 core\n"
 		"layout(location = 0) in vec3 vertex;\n"
 		"layout(location = 1) in vec3 normal;\n"
 		"layout(location = 2) in vec2 tex_coord;\n"
@@ -110,35 +134,35 @@ void Controller::initialize() {
 		"out vec3 Normal;\n"
 		"void main() {\n"
 		"	TexCoords = tex_coord;\n"
-		"	Normal = normal;\n"
+		"	Normal = mat3(transpose(inverse(model))) * normal;\n"
 		"	FragPos = vec3(model * vec4(vertex, 1.0));\n"
 		"	gl_Position = projection * view * vec4(FragPos, 1.0);\n"
 		"}\n";
-	string shaderFragSource = "#version 330 core\n"
+	shaderFragSource = "#version 330 core\n"
 		"out vec4 color;\n"
-		"uniform sampler2D text;\n"
+		"uniform sampler2D tex;\n"
 		"in vec2 TexCoords;\n"
 		"in vec3 Normal;\n"
 		"in vec3 FragPos;\n"
+		"uniform vec3 viewPos;\n"
+		"uniform vec3 lightDir;\n"
+		"uniform vec3 ambient;\n"
 		"void main() {\n"
-		// ambient
-		"	float ambientStrength = 0.1;"
-		"	vec3 ambient = vec3(ambientStrength);"
 		// diffuse
+		"	vec3 lightDirN = normalize(lightDir);"
 		"	vec3 norm = normalize(Normal);"
-		"	vec3 lightDir = normalize(vec3(1, 0, 0));"
-		"	float diff = max(dot(norm, lightDir), 0.0);"
+		"	float diff = max(dot(norm, lightDirN), 0.0);"
 		"	vec3 diffuse = diff * vec3(1.0);"
 		// specular
-		"	float specularStrength = 0.5;"
-		"	vec3 viewDir = normalize(vec3(0, 0, 3) - FragPos);"
-		"	vec3 reflectDir = reflect(-lightDir, norm);"
-		"	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);"
-		"	vec3 specular = specularStrength * spec * vec3(1.0);"
+		"	float spec = 0;"
+		"	float specularStrength = 0.25;"
+		"	vec3 viewDir = normalize(viewPos - FragPos);"
+		"	vec3 reflectDir = reflect(-lightDirN, norm);"
+		"	spec = specularStrength * pow(max(dot(viewDir, reflectDir), 0.0), 16);"
+		"	vec3 specular = spec * vec3(1.0);"
 		// result
-		//"	vec4 sample = texture(text, TexCoords);\n"
-		"	color = vec4(1.0);\n"
-		//"	color = vec4(ambient + diffuse + specular, 1.0);\n"
+		"	vec4 sample = texture(tex, TexCoords);\n"
+		"	color = vec4(ambient + diffuse + specular, 1.0) * sample;\n"
 		"}\n";
 	shader = new GLShaderProgram(shaderVertSource, shaderFragSource);
 }
@@ -250,12 +274,12 @@ Controller::Controller(string name, bool isNew) {
 	vector<void*> temp;
 	extern GLuint shieldSpotTexture, menuItemTex;
 
+	setUpFrame();
+
 	ID = "";
 	sys = this;
 	this->name = name;
 	//bg = new Background();
-	frameFront = 0;
-	frameRear = 0;
 	GRAVITY = 1;
 	t = 0;
 	hyperTime = 0;
@@ -301,53 +325,43 @@ Controller::Controller(string name, bool isNew) {
 	money = 100000;
 	autopilot = false;
 
-/*
-	keyCode prefKey;
+	keys = new Uint8[END_OF_KEYS];
+	keys[LEFT] = SDL_SCANCODE_LEFT;
+	keys[RIGHT] = SDL_SCANCODE_RIGHT;
+	keys[FORWARD] = SDL_SCANCODE_W;
+	keys[SLOW] = SDL_SCANCODE_S;
+	keys[AUTO] = SDL_SCANCODE_LSHIFT;
+	keys[SELECT] = SDL_SCANCODE_TAB;
+	keys[ORBIT] = SDL_SCANCODE_O;
+	keys[HYPER] = SDL_SCANCODE_H;
+	keys[LAND] = SDL_SCANCODE_L;
+	keys[PREF] = SDL_SCANCODE_P;
+	keys[MAP] = SDL_SCANCODE_M;
+	keys[SELECT_SHIP] = SDL_SCANCODE_E;
+	//keys[FIRE_PRIMARY] = SDL_SCANCODE_LBUTTON;
+	keys[SELECT_SYSTEM] = SDL_SCANCODE_G;
+	keys[SELECT_SECONDARY] = SDL_SCANCODE_SLASH;
+	//keys[FIRE_SECONDARY] = SDL_SCANCODE_RBUTTON;
+	keys[REAR_VIEW] = SDL_SCANCODE_R;
+	keys[SELECT_AT] = SDL_SCANCODE_COMMA;
+	keys[INVENTORY] = SDL_SCANCODE_I;
+	keys[BOARD] = SDL_SCANCODE_B;
+	keys[RECALL] = SDL_SCANCODE_C;
+	keys[RD_PERSON] = SDL_SCANCODE_3;
+	keys[PAUSE_KEY] = SDL_SCANCODE_LEFTBRACKET;
+	keys[UP] = SDL_SCANCODE_UP;
+	keys[DOWN] = SDL_SCANCODE_DOWN;
+	keys[FULL] = SDL_SCANCODE_F;
+	keys[THROTTLE_UP] = SDL_SCANCODE_A;
+	keys[THROTTLE_DOWN] = SDL_SCANCODE_Z;
+	keys[CONSOLE] = SDL_SCANCODE_GRAVE;
+	keys[AB] = SDL_SCANCODE_V;
+	keys[INERTIA] = SDL_SCANCODE_N;
 
-#define assignKey( control, name )	prefKey = fromName(name);	index[control] = prefKey.index;	val[control] = prefKey.val;
-
-	assignKey( LEFT, "LEFT" )
-	assignKey( RIGHT, "RIGHT" )
-	assignKey( FORWARD, "W" )
-	assignKey( SLOW, "S" )
-	assignKey( AUTO, "SHIFT" )
-	assignKey( SELECT, "TAB" )
-	assignKey( ORBIT, "O" )
-	assignKey( HYPER, "H" )
-	assignKey( LAND, "L" )
-	assignKey( PREF, "P" )
-	assignKey( MAP, "M" )
-	assignKey( SELECT_SHIP, "E" )
-	assignKey( FIRE_PRIMARY, "MOUSE" )
-	assignKey( SELECT_SYSTEM, "G" )
-	assignKey( SELECT_SECONDARY, "/" )
-	assignKey( FIRE_SECONDARY, "RT MOUSE" )
-	assignKey( REAR_VIEW, "R" )
-	assignKey( SELECT_AT, "," )
-	assignKey( INVENTORY, "I" )
-	assignKey( BOARD, "B" )
-	assignKey( RECALL, "C" )
-	assignKey( RD_PERSON, "3" )
-	assignKey( PAUSE_KEY, "[" )
-	assignKey( UP, "UP" )
-	assignKey( DOWN, "DOWN" )
-	assignKey( FULL, "F" )
-	assignKey( THROTTLE_UP, "A" )
-	assignKey( THROTTLE_DOWN, "Z" )
-	assignKey( CONSOLE, "~" )
-	assignKey( AB, "V" )
-	assignKey( INERTIA, "N" )
-*/
-	floatVal[MOUSE] = 1.0f;
+	floatVal[MOUSE] = 0.0f;
 	floatVal[INVERT_Y] = 0.0f;
 	floatVal[SENSITIVITY] = 1.0f;
 /*
-	glLightfv( GL_LIGHT1, GL_AMBIENT, ambient );
-	glLightfv( GL_LIGHT1, GL_DIFFUSE, diffuse );
-	glLightfv( GL_LIGHT1, GL_POSITION, lightPos );
-	glEnable( GL_LIGHT1 );
-	glEnable( GL_NORMALIZE );
-
 	explode = [SoundManager registerSound:[[NSURL fileURLWithPath:@"Explosion.wav"] path]];
 	itinerary = [[NSMutableArray alloc] initWithCapacity:6];
 
@@ -378,7 +392,6 @@ Controller::Controller(string name, bool isNew) {
 	shipCheckTime = 5.0;
 	shipCheckDelta = 5.0;
 
-	//this->system->setUp();
 	//initMenus();
 	//startThreads();
 }
@@ -414,23 +427,9 @@ void Controller::update() {
 	string str;
 	double theta = 180 / pi * atan2(pos.z + 1000, pos.x) - angle;
 	bool useMouse = true;
-	vector<SpaceObject*> temp;		// temporary storage of objects to draw
 
 	/*if (FACTOR != 0)
 		threadTime = FACTOR;*/
-	//_x = 1000;
-	//_y = 0;
-	//_z = 0;
-	//globalToLocal();
-	//lightPos[0] = _x;
-	//lightPos[1] = _y;
-	//lightPos[2] = _z;
-	//if (viewStyle == 1) {		// overhead view lighting
-	//	lightPos[0] = lightPos[0];
-	//	lightPos[1] = -lightPos[2];
-	//	lightPos[2] = 0;
-	//}
-	//glLightfv(GL_LIGHT1, GL_POSITION, lightPos);
 
 	if (t > shipCheckTime) {
 		shared_ptr<AI> tempShip = system->types->newInstance();
@@ -448,9 +447,10 @@ void Controller::update() {
 		shipCheckTime = t + (shipCheckDelta * rand()) / RAND_MAX;
 	}
 
-	keyMap = SDL_GetKeyboardState(nullptr);
+	int length;
+	keyMap = SDL_GetKeyboardState(&length);
 	if (oldKeys == nullptr)
-		oldKeys = new Uint8[sizeof(keyMap)];
+		oldKeys = new Uint8[length];
 
 	killRot = true;
 	killVertRot = true;
@@ -470,12 +470,13 @@ void Controller::update() {
 	}
 	if( keyMap[SDL_SCANCODE_ESCAPE] )
 		[EHMenu displayMenu : @"Main Menu"];
-	if (NEW_PRESS(PAUSE_KEY))
-		[self pause];
-	if (pause) {
+	*/
+	if (NEWPRESS(PAUSE_KEY))
+		pause();
+	if (paused) {
 		goto updateKeys;		// if paused, don't use keys
 	}
-	if (NEW_PRESS(PREF)) {
+	/*if (NEW_PRESS(PREF)) {
 		setUpPrefs();
 		return;
 	}
@@ -487,25 +488,25 @@ void Controller::update() {
 		setUpInventory();
 		return;
 	}*/
-	if (keyMap[SDL_SCANCODE_LEFT]) {	// left arrow
+	if (keyMap[keys[LEFT]]) {	// left arrow
 		useMouse = false;
 		left = true;
 		killRot = false;
 	}
-	else if (oldKeys[SDL_SCANCODE_LEFT]) {
+	else if (oldKeys[keys[LEFT]]) {
 		killRot = true;
 	}
-	if (keyMap[SDL_SCANCODE_RIGHT]) {	// right arrow
+	if (keyMap[keys[RIGHT]]) {	// right arrow
 		useMouse = false;
 		right = true;
 		killRot = false;
 	}
-	else if (oldKeys[SDL_SCANCODE_RIGHT]) {
+	else if (oldKeys[keys[RIGHT]]) {
 		killRot = true;
 	}
-	if (keyMap[SDL_SCANCODE_UP])	// up arrow
+	if (keyMap[keys[FORWARD]])	// up arrow
 		forward = true;
-	if (keyMap[SDL_SCANCODE_DOWN])	// down arrow
+	if (keyMap[keys[SLOW]])	// down arrow
 		slow = true;
 	/*if (NEW_PRESS(AUTO))	// autopilot
 		autopilot = !autopilot;
@@ -641,8 +642,8 @@ void Controller::update() {
 updateKeys:
 
 	delete[] oldKeys;
-	oldKeys = new Uint8[sizeof(keyMap)];
-	memcpy(oldKeys, keyMap, sizeof(keyMap));
+	oldKeys = new Uint8[length];
+	memcpy(oldKeys, keyMap, length);
 
 	if (useMouse && floatVal[MOUSE] == 0.0f && !autopilot) {
 		int mouseX, mouseY;
@@ -650,12 +651,6 @@ updateKeys:
 		float wantedPitch;
 
 		SDL_GetMouseState(&mouseX, &mouseY);
-		/*if (!full) {
-			extern NSWindow* window;
-			NSRect r = [window frame];
-			mouse.h -= r.origin.x;
-			mouse.v = -r.origin.y + mouse.v;
-		}*/
 		wantedRot = floatVal[SENSITIVITY] * MAX_ANGULAR_VELOCITY * (screenWidth / 2 - mouseX) / (screenWidth / 2);
 		wantedPitch = floatVal[SENSITIVITY] * MAX_ANGULAR_VELOCITY * (screenHeight / 2 - mouseY) / (screenHeight / 2);
 		if (floatVal[INVERT_Y] == 1.0)
@@ -763,10 +758,33 @@ updateKeys:
 			deltaPitch = 0;
 	}
 
+	// separate thread for updating?
+	for (i = 0; i < planets.size(); i++) {
+		planets[i]->update();
+	}
+	/*for (shared_ptr<Spaceship> ship : ships) {
+		if (ship.get() != sys )
+			ship->update();
+	}
+	for (shared_ptr<Asteroid> asteroid : asteroids) {
+		asteroid->update();
+	}
+	for (shared_ptr<Weapon> weap : weapons) {
+		weap->update();
+	}*/
+
 // Draw Stuff
 	glEnable(GL_BLEND);
 	Background::draw();
 	system->update();
+
+	shader->use();
+	shader->setUniform3f("viewPos", sys->pos.x, sys->pos.y, sys->pos.z);
+	shader->setUniform3f("lightDir", sys->system->lightDir.x, sys->system->lightDir.y, sys->system->lightDir.z);
+	shader->setUniform3f("ambient", sys->system->ambient.x, sys->system->ambient.y, sys->system->ambient.z);
+	shader->setUniformMat4("projection", GLShaderProgram::perspective);
+	glm::mat4 view = glm::lookAt(pos, pos + vForward, vUp);
+	shader->setUniformMat4("view", view);
 
 	glEnable(GL_LIGHTING);
 	for (i = 0; i < planets.size(); i++) {		// draw each planet
@@ -831,15 +849,15 @@ updateKeys:
 	//[StarDust update] ;
 
 	glDisable(GL_DEPTH_TEST);
-	//if (viewStyle == 0 || viewStyle == 2)
-	//	drawFrame();
-	//if (sys->viewStyle != 2) {
-	//	drawNavTab();
-	//	drawSelectionTab(1);
-	//	drawSelectionTab(2);
-	//	drawSelectionTab(3);
-	//	drawInfoTab();
-	//}
+	if (viewStyle == 0 || viewStyle == 2)
+		drawFrame();
+	if (viewStyle != 2) {
+		drawNavTab();
+		drawSelectionTab(1);
+		drawSelectionTab(2);
+		drawSelectionTab(3);
+		drawInfoTab();
+	}
 	/*if (console)
 		[Console draw];*/
 	glEnable(GL_DEPTH_TEST);
@@ -994,95 +1012,124 @@ void Controller::doHyperspace(){
 void Controller::doLand(){
 }
 
-void Controller::setUpFrame() {
-	if (frameFront != 0) {
-		glDeleteLists(frameFront, 2);
-	}
-	frameFront = glGenLists(2);
-	frameRear = frameFront + 1;
-	if( frameFile == "" ){
-		glNewList(frameFront, GL_COMPILE);
-		glBegin(GL_QUADS);
-		glColor3f(.5, .5, .5);
-		glVertex2f(-.83, 1);
-		glVertex2f(-.83, .555);
-		glColor3f(0, 0, 0);
-		glVertex2f(-.67, .555);
-		glVertex2f(-.67, 1);
-
-		glVertex2f(-1, -1);
-		glVertex2f(-.67, .555);
-		glColor3f(.5, .5, .5);
-		glVertex2f(-.83, .555);
-		glVertex2f(-1.15, -1);
-
-		glVertex2f(1.15, -1);
-		glVertex2f(.83, .567);
-		glColor3f(0, 0, 0);
-		glVertex2f(.67, .567);
-		glVertex2f(1, -1);
-
-		glVertex2f(.67, 1);
-		glVertex2f(.67, .567);
-		glColor3f(.5, .5, .5);
-		glVertex2f(.83, .567);
-		glVertex2f(.83, 1);
-		glEnd();
-		glEndList();
-		frameRear = frameFront;
-	} else {
-		ifstream file;
-		file.open(frameFile);
-		string str ;
-
-		if (file.is_open()) {
-			while (file >> str && !file.eof()) {
-				if (str == "<FRONT>")
-					glNewList(frameFront, GL_COMPILE);
-				else if (str == "<REAR>")
-					glNewList(frameRear, GL_COMPILE);
-				else if (str == "<REARSAME>")
-					frameRear = frameFront;
-				else if (str == "</FRONT>" || str == "</REAR>")
-					glEndList();
-
-				else if( str == "<QUADS>" )
-					glBegin(GL_QUADS);
-				else if (str == "<POINTS>")
-					glBegin(GL_POINTS);
-				else if (str == "<LINES>")
-					glBegin(GL_LINES);
-				else if (str == "<LINESTRIP>")
-					glBegin(GL_LINE_STRIP);
-				else if (str == "<LINELOOP>")
-					glBegin(GL_LINE_LOOP);
-				else if (str == "<TRIANGLES>")
-					glBegin(GL_TRIANGLES);
-				else if (str == "<TRIANGLESTRIP>")
-					glBegin(GL_TRIANGLE_STRIP);
-				else if (str == "<TRIANGLEFAN>")
-					glBegin(GL_TRIANGLE_FAN);
-				else if (str == "<QUADSTRIP>")
-					glBegin(GL_QUAD_STRIP);
-				else if (str == "<POLYGON>")
-					glBegin(GL_POLYGON);
-				else if (str == "</QUADS>" || str == "</POINTS>" || str == "</LINES>" || str == "</LINESTRIP>" || str == "</LINELOOP>" || str == "</TRIANGLES>" || str == "</TRIANGLESTRIP>" || str == "</TRIANGLEFAN>" || str == "</QUADSTRIP>" || str == "</POLYGON>")
-					glEnd();
-
-				else if (str == "Color") {
-					float f1, f2, f3;
-					file >> f1 >> f2 >> f3;
-					glColor3f(f1, f2, f3);
-				}
-				else if (str == "Vertex") {
-					float f1, f2;
-					file >> f1 >> f2;
-					glVertex2f(f1, f2);
-				}
-			}
-			file.close();
+void Controller::pause() {
+	paused = !paused;
+	/*	if( !full ){
+		if( pause ){
+			ShowCursor();
+			CGAssociateMouseAndMouseCursorPosition( YES );
+		} else {
+			HideCursor();
+			if( floatVal[MOUSE] == 1.0f )
+				CGAssociateMouseAndMouseCursorPosition( NO );
 		}
 	}
+	if( pause ){
+		[EHMenu displayMenu:@"Pause"];	
+		[pauseLock lock];
+	} else{
+		[pauseLock unlock];
+	}*/
+}
+
+void Controller::drawFrame() {
+	frameShader->use();
+	frameShader->setUniformf("useTexture", 0.0f);
+	glBindVertexArray(frameVAO);
+	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+void Controller::drawNavTab() {
+	glViewport(5 * screenWidth / 6, screenHeight - screenWidth / 6, screenWidth / 6 + 1, screenWidth / 6);
+	frameShader->use();
+	frameShader->setUniformf("useTexture", 1.0f);
+	frameShader->setUniform3f("color", 1.0f, 1.0f, 1.0f);
+	glBindTexture(GL_TEXTURE_2D, texture[NAVPANEL_TEXTURE]);
+	glBindVertexArray(squareVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glViewport(0, 0, screenWidth, screenHeight);
+}
+
+void Controller::drawSelectionTab(int tab) {
+
+}
+
+void Controller::drawInfoTab() {
+
+}
+
+void Controller::setUpFrame() {
+	GLfloat vertices[] = {
+		// x, y, r, g, b
+		-0.83f, 1.0f, 0.5f, 0.5f, 0.5f,
+		-0.83f, 0.555f, 0.5f, 0.5f, 0.5f,
+		-0.67f, 0.555f, 0.0f, 0.0f, 0.0f,
+		-0.67f, 1.0f, 0.0f, 0.0f, 0.0f,
+
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		-0.67f, 0.555f, 0.0f, 0.0f, 0.0f,
+		-0.83f, 0.555f, 0.5f, 0.5f, 0.5f,
+		-1.15f, -1.0f, 0.5f, 0.5f, 0.5f,
+
+		1.15f, -1.0f, 0.5f, 0.5f, 0.5f,
+		0.83f, 0.567f, 0.5f, 0.5f, 0.5f,
+		0.67f, 0.567f, 0.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+
+		0.67f, 1.0f, 0.0f, 0.0f, 0.0f,
+		0.67f, 0.567f, 0.0f, 0.0f, 0.0f,
+		0.83f, 0.567f, 0.5f, 0.5f, 0.5f,
+		0.83f, 1.0f, 0.5f, 0.5f, 0.5f
+	};
+
+	GLuint indices[] = {
+		0, 1, 2,
+		0, 2, 3,
+		4, 5, 6,
+		4, 6, 7,
+		8, 9, 10,
+		8, 10, 11,
+		12, 13, 14,
+		12, 14, 15
+	};
+
+	glGenBuffers(1, &frameVBO);
+	glGenVertexArrays(1, &frameVAO);
+	glBindVertexArray(frameVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, frameVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices)*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
+	glGenBuffers(1, &frameEBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, frameEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices) * sizeof(GLuint), indices, GL_STATIC_DRAW);
+
+	GLfloat squareV[] = {
+		// x, y, u, v, -
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f, 1.0f, 0.0f
+	};
+
+	glGenBuffers(1, &squareVBO);
+	glGenVertexArrays(1, &squareVAO);
+	glBindVertexArray(squareVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, squareVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(squareV) * sizeof(GLfloat), squareV, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
 }
 
 void Controller::drawString(const string& str, float x, float y, float *color) {

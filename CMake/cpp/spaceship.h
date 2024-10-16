@@ -15,7 +15,7 @@ class Government;
 
 class Spaceship : public Object3D, public EHObject {
 public:
-	bool left, right, forward, slow, autopilot, orbit, hyperspace, land, fire, fireSecondary, up, down, throttleUp, throttleDown, afterburner;
+	bool left = false, right = false, forward, slow, autopilot, orbit, hyperspace, land, fire, fireSecondary, up, down, throttleUp, throttleDown, afterburner;
 	shared_ptr<Planet> curPlanet;				// selected planet
 	shared_ptr<AI> selection;					// selected spaceship
 	float hyperTime;				// powering up for hyper jump
