@@ -49,6 +49,7 @@ enum {
 	HYPER,				// activate hyperspace jump
 	REAR_VIEW,			// rear view
 	RD_PERSON,			// 3rd person view
+	TOP_VIEW,			// top view
 	FIRE_PRIMARY,		// fire all primary weapons
 	SELECT_SECONDARY,	// select next secondary weapon
 	FIRE_SECONDARY,		// fire selected secondary weapon
@@ -79,10 +80,10 @@ enum {					// pref float values
 class Controller : public Spaceship {
 protected:
 	static GLShaderProgram* stringShader;
-	static GLShaderProgram* frameShader;
 
 public:
 	static GLShaderProgram* shader;
+	static GLShaderProgram* frameShader;
 
 	vector<shared_ptr<Planet>> planets;
 	shared_ptr<Solarsystem> system;
@@ -149,6 +150,7 @@ public:
 	void drawSelectionTab(int pos);
 	void drawInfoTab();
 	void drawObject(SpaceObject *o);
+	glm::mat4& viewMatrix();
 
 	static void drawString(const string& str, float x, float y, float *color);
 	static vector<shared_ptr<EHObject>> objectsOfType(const string& type);

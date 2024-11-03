@@ -1,3 +1,5 @@
+#include <functional>
+
 #include "solarsystem.h"
 #include "spaceobject.h"
 #include "controller.h"
@@ -7,10 +9,37 @@
 #include "type.h"
 #include "government.h"
 #include "background.h"
+#include <glm/ext/matrix_transform.hpp>
 
-GLuint backdrop[4];
-int backdropWidth[4];
-int backdropHeight[4];
+GLuint Solarsystem::backdrop[4];
+int Solarsystem::backdropWidth[4];
+int Solarsystem::backdropHeight[4];
+GLuint Solarsystem::VAO, Solarsystem::VBO;
+
+void Solarsystem::initialize() {
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	float vertices[] = {
+		0, 1, -1, 1, 0, 0, 0, 1,
+		0, 1, 1, 1, 0, 0, 1, 1,
+		0, -1, 1, 1, 0, 0, 1, 0,
+		0, 1, -1, 1, 0, 0, 0, 1,
+		0, -1, 1, 1, 0, 0, 1, 0,
+		0, -1, -1, 1, 0, 0, 0, 0
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+}
 
 void Solarsystem::setUp() {
 	int i;
@@ -59,11 +88,14 @@ void Solarsystem::setUp() {
 		sys->asteroids.push_back(shared_ptr<Asteroid>(new Asteroid()));
 	}
 	for (i = 0; i < backdrops; i++) {
+		if (backdrop[i] != 0)
+			glDeleteTextures(1, &backdrop[i]);
 		Texture::loadTexture(backdropPath[i].c_str(), &backdrop[i], &backdropWidth[i], &backdropHeight[i]);
 	}
 	if (!sys->systems.count(ID))
 		sys->systems.emplace(ID);
-	Background::generate(0.2f);
+	hash<string> hasher;
+	Background::generate(starDensity, hasher(ID));
 }
 
 void Solarsystem::registerFromDictionary(const json& dictionary) {
@@ -90,6 +122,7 @@ void Solarsystem::registerFromDictionary(const json& dictionary) {
 	system->description = dictionary.contains("Description") ? (string)dictionary["Description"] : "";
 	system->asteroids = dictionary.contains("Asteroids") ? (int)dictionary["Asteroids"] : 5;
 	system->initData["ShipTypes"] = dictionary.contains("ShipTypes") ? dictionary["ShipTypes"] : empty;
+	system->starDensity = dictionary.contains("StarDensity") ? (float)dictionary["StarDensity"] : 1.0f;
 	if (dictionary.contains("Backdrops") && dictionary["Backdrops"].is_array()) {
 		system->backdrops = dictionary["Backdrops"].size();
 		for (int i = 0; i < system->backdrops; i++) {
@@ -139,48 +172,29 @@ void Solarsystem::finalize() {
 	//initData.clear();
 }
 
-void Solarsystem::update() {
+void Solarsystem::draw(glm::mat4& view, glm::mat4& projection) {
 	int i;
 
 	if (sys->viewStyle == 1)
 		return;
-	/*glDisable(GL_DEPTH_TEST);
-	glColor3f(1, 1, 1);
-	glLoadIdentity();
-	if (sys->viewStyle == 0) {
-		glRotatef(-sys->pitch, 1, 0, 0);
-		glRotatef(-sys->roll, 0, 0, 1);
-		glRotatef(180 - sys->angle, 0, 1, 0);
-	}
-	else if (sys->viewStyle == 2) {
-		glRotatef(sys->pitch, 1, 0, 0);
-		glRotatef(sys->roll, 0, 0, 1);
-		glRotatef(90 - sys->angle, 0, 1, 0);
-	}
-	else if (sys->viewStyle == 3) {
-		glRotatef(sys->deltaRot / 10, 0, 1, 0);
-		glRotatef(sys->deltaPitch / 10, 1, 0, 0);
-		glRotatef(-sys->pitch, 1, 0, 0);
-		glRotatef(-sys->roll, 0, 0, 1);
-		glRotatef(270 - sys->angle, 0, 1, 0);
-	}
+	
+	sys->shader->setUniformb("useLighting", false);
+	glDisable(GL_DEPTH_TEST);
 	for (i = 0; i < backdrops; i++) {
-		float xSize = backdropWidth[i] / 4.0f;
-		float ySize = backdropHeight[i] / 4.0f;
-		float back = sqrt(250000 - xSize * xSize - ySize * ySize) - 50;
+		float back = 250;
+		float xSize = backdropWidth[i] * 160.0f / gScreenWidth;
+		float ySize = backdropHeight[i] * 160.0f / gScreenWidth;
 		glBindTexture(GL_TEXTURE_2D, backdrop[i]);
-		glBegin(GL_QUADS);
-		glTexCoord2d(0, 0);
-		glVertex3f(-xSize, -ySize, -back);
-		glTexCoord2d(1, 0);
-		glVertex3f(xSize, -ySize, -back);
-		glTexCoord2d(1, 1);
-		glVertex3f(xSize, ySize, -back);
-		glTexCoord2d(0, 1);
-		glVertex3f(-xSize, ySize, -back);
-		glEnd();
+		glm::mat4 model = glm::rotate(glm::mat4(1.0f), float(backdropElev[i] * SpaceObject::pi / 180), glm::vec3(0, 0, 1));
+		model = glm::rotate(model, float(backdropAngle[i] * SpaceObject::pi / 180), glm::vec3(0, 1, 0));
+		model = glm::translate(model, glm::vec3(-back, 0, 0));
+		model = glm::scale(model, glm::vec3(1, ySize, xSize));
+		sys->shader->setUniformMat4("model", model);
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
-	glEnable(GL_DEPTH_TEST);*/
+	glEnable(GL_DEPTH_TEST);
+	sys->shader->setUniformb("useLighting", true);
 }
 
 Solarsystem::~Solarsystem() {

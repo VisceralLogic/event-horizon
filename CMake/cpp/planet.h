@@ -22,7 +22,7 @@ public:
 	shared_ptr<Object3D> model;				// used for a space station
 	float inclination;				// orbital inclination from ecliptic
 	string ringTex;				// path to optional ring texture file
-	float ringSize;					// radius of ring
+	float ringSize = 0;					// radius of ring
 	string atmosTex;				// path to optional atmosphere texture file
 	float atmosSize;				// ratio of radius of atmosphere to planetary radius
 	float atmosSpeed;				// rotation of atmosphere (relative)
@@ -31,6 +31,7 @@ public:
 	shared_ptr<Solarsystem> system;			// which system this planet belongs to
 
 	static Sphere* sphere;
+	static GLuint ringVAO, ringVBO;
 
 	Planet();
 	~Planet();
@@ -39,6 +40,7 @@ public:
 	static void registerFromDictionary(const json& dictionary);
 	void finalize();
 	void draw();
+	void drawRing();
 	void update();
 	void orbit();
 

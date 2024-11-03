@@ -1,4 +1,5 @@
 #include "obj.h"
+#include <iostream>
 
 OBJ::~OBJ() {
 	glDeleteBuffers(1, &VBO);
@@ -9,6 +10,7 @@ void OBJ::generateBuffers(){
 	// fill in vertex data
 	triangles = 0;
 	vector<float> vertexData;
+
 	for (int j = 0; j < faces.size(); j++) {
 		vector<shared_ptr<Coord>> face = faces[j];
 		shared_ptr<Coord> a = face[0];
@@ -26,6 +28,11 @@ void OBJ::generateBuffers(){
 			triangles++;
 		}
 	}
+
+	faces.clear();
+	vertices.clear();
+	normals.clear();
+	uvCoords.clear();
 
 	glGenBuffers(1, &VBO);
 	glGenVertexArrays(1, &VAO);

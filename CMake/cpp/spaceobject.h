@@ -45,7 +45,6 @@ public:
 	double theta = 0;					// angle about centerOfRotation
 
 	string name = "<SpaceObject>";
-	//void* initData;					// used to store data between init and finalize
 	string description = "";			// information about this
 	string flagRequirements = "";		// flags planet must have for this to be sold there
 

@@ -30,13 +30,20 @@ public:
 	bool displayOnMap;				// show system info on map
 	glm::vec3 lightDir;				// direction of light source
 	glm::vec3 ambient;				// ambient light
+	float starDensity = 1.0f;		// density of stars in background
 
 	~Solarsystem();
 	static void registerFromDictionary(const json& dictionary);
 	void finalize();	// needed for plugins
 	void setUp();		// the player just entered
-	void update();
+	void draw(glm::mat4& view, glm::mat4& projection);		// draw backdrops
+	static void initialize();
 
 	vector<shared_ptr<Planet>> getPlanets();
 	vector<shared_ptr<Solarsystem>> getLinks();
+
+	static GLuint backdrop[4];	// backdrop textures
+	static int backdropWidth[4];	// width of each backdrop
+	static int backdropHeight[4];	// height of each backdrop
+	static GLuint VAO, VBO;		// for drawing backdrops
 };

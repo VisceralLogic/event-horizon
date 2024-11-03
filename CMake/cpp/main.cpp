@@ -14,6 +14,7 @@
 #include "shader.h"
 #include "planet.h"
 #include "background.h"
+#include "solarsystem.h"
 
 SDL_Window* window;
 SDL_GLContext context;
@@ -44,8 +45,8 @@ bool setup() {
     }
 
     SDL_GetDisplayBounds(0, &displayBounds);
-    gScreenWidth = 1280; // displayBounds.w;
-    gScreenHeight = 800; // displayBounds.h;
+    gScreenWidth = 1280;// displayBounds.w;
+    gScreenHeight = 800;// displayBounds.h;
 
     // Create a window
     window = SDL_CreateWindow("Event Horizon", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gScreenWidth, gScreenHeight, /*SDL_WINDOW_FULLSCREEN_DESKTOP |*/ SDL_WINDOW_OPENGL);
@@ -59,6 +60,7 @@ bool setup() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
 
     // Create an OpenGL context
     context = SDL_GL_CreateContext(window);
@@ -87,6 +89,7 @@ bool setup() {
     EHButton::initialize();
     Planet::initialize();
 	Background::initialize();
+    Solarsystem::initialize();
 
     beginPlayer();
 

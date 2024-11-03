@@ -110,11 +110,11 @@ void Controller::initialize() {
 	string shaderFragSource = "#version 330 core\n"
 		"out vec4 Color;\n"
 		"in vec3 Attrib;\n"
-		"uniform float useTexture;\n"
+		"uniform bool useTexture;\n"
 		"uniform vec3 color;\n"
 		"uniform sampler2D tex;\n"
 		"void main() {\n"
-		"	if( useTexture == 0.0 ){\n"
+		"	if( useTexture == false ){\n"
 		"		Color = vec4(Attrib, 1.0);\n"
 		"	} else {\n"
 		"		Color = vec4(color, 1.0) * texture(tex, vec2(Attrib.x, Attrib.y));\n"
@@ -133,10 +133,14 @@ void Controller::initialize() {
 		"out vec3 FragPos;\n"
 		"out vec3 Normal;\n"
 		"void main() {\n"
+		"	float near = 0.1;"
+		"	float far = 500;"
 		"	TexCoords = tex_coord;\n"
 		"	Normal = mat3(transpose(inverse(model))) * normal;\n"
 		"	FragPos = vec3(model * vec4(vertex, 1.0));\n"
 		"	gl_Position = projection * view * vec4(FragPos, 1.0);\n"
+		"	gl_Position.z = 2.0*log(gl_Position.w/near)/log(far/near)-1;"
+		"	gl_Position.z *= gl_Position.w;"
 		"}\n";
 	shaderFragSource = "#version 330 core\n"
 		"out vec4 color;\n"
@@ -147,22 +151,27 @@ void Controller::initialize() {
 		"uniform vec3 viewPos;\n"
 		"uniform vec3 lightDir;\n"
 		"uniform vec3 ambient;\n"
+		"uniform bool useLighting;\n"
 		"void main() {\n"
+		"	if( useLighting ){"
 		// diffuse
-		"	vec3 lightDirN = normalize(lightDir);"
-		"	vec3 norm = normalize(Normal);"
-		"	float diff = max(dot(norm, lightDirN), 0.0);"
-		"	vec3 diffuse = diff * vec3(1.0);"
+		"		vec3 lightDirN = normalize(lightDir);"
+		"		vec3 norm = normalize(Normal);"
+		"		float diff = max(dot(norm, lightDirN), 0.0);"
+		"		vec3 diffuse = diff * vec3(1.0);"
 		// specular
-		"	float spec = 0;"
-		"	float specularStrength = 0.25;"
-		"	vec3 viewDir = normalize(viewPos - FragPos);"
-		"	vec3 reflectDir = reflect(-lightDirN, norm);"
-		"	spec = specularStrength * pow(max(dot(viewDir, reflectDir), 0.0), 16);"
-		"	vec3 specular = spec * vec3(1.0);"
+		"		float spec = 0;"
+		"		float specularStrength = 0.25;"
+		"		vec3 viewDir = normalize(viewPos - FragPos);"
+		"		vec3 reflectDir = reflect(-lightDirN, norm);"
+		"		spec = specularStrength * pow(max(dot(viewDir, reflectDir), 0.0), 16);"
+		"		vec3 specular = spec * vec3(1.0);"
 		// result
-		"	vec4 sample = texture(tex, TexCoords);\n"
-		"	color = vec4(ambient + diffuse + specular, 1.0) * sample;\n"
+		"		vec4 sample = texture(tex, TexCoords);\n"
+		"		color = vec4(ambient + diffuse + specular, 1.0) * sample;\n"
+		"	} else {"
+		"		color = texture(tex, TexCoords);\n"
+		"	}"
 		"}\n";
 	shader = new GLShaderProgram(shaderVertSource, shaderFragSource);
 }
@@ -175,6 +184,7 @@ void Controller::drawObject(SpaceObject *o) {
 	shader->setUniformMat4("view",view);
 	shader->setUniformMat4("model", model);
 	shader->setUniformMat4("projection", GLShaderProgram::perspective);
+	shader->setUniformb("useLighting", true);
 	o->draw();
 }
 
@@ -347,6 +357,7 @@ Controller::Controller(string name, bool isNew) {
 	keys[INVENTORY] = SDL_SCANCODE_I;
 	keys[BOARD] = SDL_SCANCODE_B;
 	keys[RECALL] = SDL_SCANCODE_C;
+	keys[TOP_VIEW] = SDL_SCANCODE_1;
 	keys[RD_PERSON] = SDL_SCANCODE_3;
 	keys[PAUSE_KEY] = SDL_SCANCODE_LEFTBRACKET;
 	keys[UP] = SDL_SCANCODE_UP;
@@ -556,14 +567,26 @@ void Controller::update() {
 	}
 	if (keys[index[FIRE_SECONDARY]] & val[FIRE_SECONDARY]) {
 		fireSecondary = YES;
-	}
-	if (NEW_PRESS(REAR_VIEW)) {
+	}*/
+	if (NEWPRESS(REAR_VIEW)) {
 		if (viewStyle == 2)
 			viewStyle = 0;
 		else
 			viewStyle = 2;
 	}
-	if (NEW_PRESS(SELECT_AT)) {
+	if(NEWPRESS(RD_PERSON)) {
+		if (viewStyle != 3)
+			viewStyle = 3;
+		else
+			viewStyle = 0;
+	}
+	if (NEWPRESS(TOP_VIEW)) {
+		if (viewStyle != 1)
+			viewStyle = 1;
+		else
+			viewStyle = 0;
+	}
+	/*if (NEW_PRESS(SELECT_AT)) {
 		int i;
 		Spaceship* ship = nil;
 		float dist = -1;
@@ -605,12 +628,6 @@ void Controller::update() {
 			escort->bound = bound;
 			escort->goal = DO_ESCORT;
 		}
-	}
-	if (NEW_PRESS(RD_PERSON)) {
-		if (viewStyle != 3)
-			viewStyle = 3;
-		else
-			viewStyle = 0;
 	}
 	if (keys[index[UP]] & val[UP]) {
 		useMouse = NO;
@@ -776,17 +793,18 @@ updateKeys:
 // Draw Stuff
 	glEnable(GL_BLEND);
 	Background::draw();
-	system->update();
 
 	shader->use();
+	shader->setUniformb("useLighting", true);
 	shader->setUniform3f("viewPos", sys->pos.x, sys->pos.y, sys->pos.z);
 	shader->setUniform3f("lightDir", sys->system->lightDir.x, sys->system->lightDir.y, sys->system->lightDir.z);
 	shader->setUniform3f("ambient", sys->system->ambient.x, sys->system->ambient.y, sys->system->ambient.z);
 	shader->setUniformMat4("projection", GLShaderProgram::perspective);
-	glm::mat4 view = glm::lookAt(pos, pos + vForward, vUp);
+	glm::mat4 view = viewMatrix();
 	shader->setUniformMat4("view", view);
 
-	glEnable(GL_LIGHTING);
+	system->draw(view, GLShaderProgram::perspective);
+
 	for (i = 0; i < planets.size(); i++) {		// draw each planet
 		planets[i]->draw();
 	}
@@ -815,7 +833,8 @@ updateKeys:
 		//weap->draw();
 	}
 
-	glDisable(GL_LIGHTING);
+	shader->setUniformb("useLighting", false);
+
 	//[EHMenu update : keys] ;
 
 	if (curPlanet) {		// draw selection bracket
@@ -840,8 +859,8 @@ updateKeys:
 		}
 	}
 
-	for (i = 0; i < planets.size(); i++) {
-		//planets[i]->drawRing();
+	for ( shared_ptr<Planet> planet : planets ) {
+		planet->drawRing();
 	}
 
 	glEnable(GL_CULL_FACE);
@@ -924,6 +943,19 @@ updateKeys:
 		state = DEAD;
 
 	//[SoundManager update] ;
+}
+
+glm::mat4& Controller::viewMatrix() {
+	glm::mat4 view;
+	if (viewStyle == 0)
+		view = glm::lookAt(pos, pos + vForward, vUp);
+	else if (viewStyle == 1)
+		view = glm::lookAt(pos + glm::vec3(0, 10, 0), pos, pos + glm::vec3(1, 10, 0));
+	else if (viewStyle == 2)
+		view = glm::lookAt(pos, pos - vForward, vUp);
+	else if (viewStyle == 3)
+		view = glm::lookAt(pos - 2.0f * vForward + vUp, pos - vForward + vUp, vUp);
+	return view;
 }
 
 vector<shared_ptr<EHObject>> Controller::objectsOfType(const string& type) {
@@ -1034,7 +1066,7 @@ void Controller::pause() {
 
 void Controller::drawFrame() {
 	frameShader->use();
-	frameShader->setUniformf("useTexture", 0.0f);
+	frameShader->setUniformb("useTexture", false);
 	glBindVertexArray(frameVAO);
 	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
@@ -1043,7 +1075,7 @@ void Controller::drawFrame() {
 void Controller::drawNavTab() {
 	glViewport(5 * screenWidth / 6, screenHeight - screenWidth / 6, screenWidth / 6 + 1, screenWidth / 6);
 	frameShader->use();
-	frameShader->setUniformf("useTexture", 1.0f);
+	frameShader->setUniformb("useTexture", true);
 	frameShader->setUniform3f("color", 1.0f, 1.0f, 1.0f);
 	glBindTexture(GL_TEXTURE_2D, texture[NAVPANEL_TEXTURE]);
 	glBindVertexArray(squareVAO);
@@ -1099,7 +1131,7 @@ void Controller::setUpFrame() {
 	glGenVertexArrays(1, &frameVAO);
 	glBindVertexArray(frameVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, frameVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices)*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -1108,7 +1140,7 @@ void Controller::setUpFrame() {
 
 	glGenBuffers(1, &frameEBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, frameEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices) * sizeof(GLuint), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	GLfloat squareV[] = {
 		// x, y, u, v, -
@@ -1124,7 +1156,7 @@ void Controller::setUpFrame() {
 	glGenVertexArrays(1, &squareVAO);
 	glBindVertexArray(squareVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, squareVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(squareV) * sizeof(GLfloat), squareV, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(squareV), squareV, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
 	glEnableVertexAttribArray(0);

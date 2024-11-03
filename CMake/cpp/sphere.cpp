@@ -13,8 +13,8 @@ Sphere::Sphere(int slices, int stacks) {
 
 	float* vertices = new float[8 * numVertices];
 
-	setVertex(vertices, 0, 0, 1, 0, 0.5, 1);
-	setVertex(vertices, numVertices-1, 0, -1, 0, 0.5, 0);
+	setVertex(vertices, 0, 0, 1, 0, 0.5, 0);
+	setVertex(vertices, numVertices-1, 0, -1, 0, 0.5, 1);
 
 	float phi, theta;
 	int index = 1;
@@ -22,7 +22,7 @@ Sphere::Sphere(int slices, int stacks) {
 		phi = M_PI * i / stacks;
 		for (int j = 0; j <= slices; j++) {
 			theta = 2 * M_PI * j / slices;
-			setVertex(vertices, index++, sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta), (float)j / slices, 1 - (float)i / stacks);
+			setVertex(vertices, index++, sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta), (float)j / slices, (float)i / stacks);
 		}	
 	}
 

@@ -97,6 +97,7 @@ void Object3D::loadOBJ(string objfile) {
 			shared_ptr<Coord> c(new Coord());
 			file >> c->x;
 			file >> c->y;
+			c->y = 1.0f - c->y;
 			o->uvCoords.push_back(c);
 		}
 		else if ( str == "f" ) {		// face
@@ -107,6 +108,8 @@ void Object3D::loadOBJ(string objfile) {
 			comps = split(str, ' ');
 			for (i = 1; i < comps.size(); i++) {
 				string comp = comps[i];
+				if (comp == "")
+					continue;
 				vector<string> temp = comp.find("//") == string::npos ? split(comp, '/') : split(comp, "//");
 				shared_ptr<Coord> c(new Coord());
 				c->x = stoi(temp[0]) -vCount;		// vertex number (1-based)
@@ -121,7 +124,7 @@ void Object3D::loadOBJ(string objfile) {
 			}
 			o->faces.push_back(face);
 		}
-		else if ( str == "ustmtl" ) {
+		else if ( str == "usemtl" ) {
 			file >> str;
 			if (o->mtl.size() == 0) {		// "default" sometimes comes along later...
 				o->mtl = str;
@@ -175,8 +178,6 @@ void Object3D::draw() {
 		shared_ptr<OBJ> o = objects[i];
 		glBindTexture(GL_TEXTURE_2D, texture[i]);
 		glBindVertexArray(o->VAO);
-		glm::mat4 model = glm::lookAt(pos, pos + vForward, vUp);
-		sys->shader->setUniformMat4("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, o->triangles);
+		glDrawArrays(GL_TRIANGLES, 0, o->triangles*3);
 	}
 }

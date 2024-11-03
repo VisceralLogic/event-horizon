@@ -4,9 +4,34 @@
 #include <glm/ext/matrix_transform.hpp>
 
 Sphere* Planet::sphere;
+GLuint Planet::ringVAO;
+GLuint Planet::ringVBO;
 
 void Planet::initialize() {
 	sphere = new Sphere(20, 20);
+
+	float vertices[] = {
+		-1, 0, -1, 0, 1, 0, 0, 0,
+		-1, 0, 1, 0, 1, 0, 0, 1,
+		1, 0, 1, 0, 1, 0, 1, 1,
+		-1, 0, -1, 0, 1, 0, 0, 0,
+		1, 0, 1, 0, 1, 0, 1, 1,
+		1, 0, -1, 0, 1, 0, 1, 0
+	};
+
+	glGenVertexArrays(1, &ringVAO);
+	glGenBuffers(1, &ringVBO);
+
+	glBindVertexArray(ringVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, ringVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);	
 	// load sounds
 }
 
@@ -92,19 +117,34 @@ Planet::~Planet() {
 void Planet::draw() {
 	//if (!visible())
 	//	return;
-	if (model) {
-		model->draw();
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, pos);
+	model = glm::rotate(model, float(pitch * pi / 180), glm::vec3(1, 0, 0));
+	model = glm::rotate(model, float(angle * pi / 180), glm::vec3(0, 1, 0));
+	model = glm::scale(model, glm::vec3(size));
+	Controller::shader->setUniformMat4("model", model);
+	if (this->model) {
+		this->model->draw();
 	}
 	else {
 		glBindTexture(GL_TEXTURE_2D, texture[0]);
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, pos);
-		model = glm::rotate(model, float((pitch + 180) * pi / 180), glm::vec3(1, 0, 0));
-		model = glm::rotate(model, float(angle * pi / 180), glm::vec3(0, 1, 0));	
-		model = glm::scale(model, glm::vec3(size));
-		Controller::shader->setUniformMat4("model", model);
 		sphere->draw();
 	}
+}
+
+void Planet::drawRing() {
+	if (ringSize == 0)
+		return;
+
+	glBindTexture(GL_TEXTURE_2D, texture[1]);
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, pos);
+	model = glm::rotate(model, float(pitch * pi / 180), glm::vec3(1, 0, 0));
+	model = glm::rotate(model, float(angle * pi / 180), glm::vec3(0, 1, 0));
+	model = glm::scale(model, glm::vec3(ringSize));
+	Controller::shader->setUniformMat4("model", model);
+	glBindVertexArray(ringVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void Planet::update() {
@@ -122,6 +162,6 @@ void Planet::orbit() {
 	else if (theta < 0)
 		theta += 360;
 	pos.x = centerOfRotation->pos.x + distance*cos(theta*pi/180);
-	pos.y = centerOfRotation->pos.y + distance*sin(theta*pi/180)*sin(inclination);
-	pos.z = centerOfRotation->pos.z + distance*sin(theta*pi/180)*cos(inclination);
+	pos.y = centerOfRotation->pos.y + distance*sin(theta*pi/180)*sin(inclination*pi/180);
+	pos.z = centerOfRotation->pos.z + distance*sin(theta*pi/180)*cos(inclination*pi/180);
 }
