@@ -54,11 +54,11 @@ shared_ptr<Mission> Mission::newInstanceIn(shared_ptr<Solarsystem> system, share
 				i--;
 			}
 		}
-		mission->endSystem = static_pointer_cast<Solarsystem>(systems[rand()*systems.size()]);
-		mission->endPlanet = mission->endSystem->planets[rand()*mission->endSystem->planets.size()];
+		mission->endSystem = static_pointer_cast<Solarsystem>(systems[rand()%systems.size()]);
+		mission->endPlanet = mission->endSystem->planets[rand()%mission->endSystem->planets.size()];
 	} else if (destType == "system") {
 		mission->endSystem = static_pointer_cast<Solarsystem>(Controller::componentNamed(dest));
-		mission->endPlanet = mission->endSystem->planets[rand() * mission->endSystem->planets.size()];
+		mission->endPlanet = mission->endSystem->planets[rand() % mission->endSystem->planets.size()];
 	} else if( destType == "planet" ) {
 		mission->endPlanet = static_pointer_cast<Planet>(Controller::componentNamed(dest));
 		mission->endSystem = mission->endPlanet->system;

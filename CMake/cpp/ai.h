@@ -1,7 +1,7 @@
 #pragma once
 #include "spaceship.h"
 
-class AI : public Spaceship, public enable_shared_from_this<AI> {
+class AI : public Spaceship {
 public:
 	shared_ptr<void> target = nullptr;		// what the current goal applies to
 	float startExplode = 0;					// time ship was killed
@@ -13,7 +13,7 @@ public:
 		DO_ESCORT			// escort target ship
 	} goal = DO_LOITER;		// what the ship is currently doing
 
-	AI(shared_ptr<Spaceship> ship);
+	void initWithShip(shared_ptr<Spaceship> ship);
 	void update();			// control this ship for one step
 	void doLand();			// overrides Spacship function
 	void draw();			// draw us

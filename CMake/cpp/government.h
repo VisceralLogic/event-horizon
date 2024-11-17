@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <set>
 #include <nlohmann/json.hpp>
 
 #include "ehobject.h"
@@ -16,8 +17,8 @@ protected:
 
 public:
 	string name;
-	vector<shared_ptr<Government>> enemies;
-	vector<shared_ptr<Government>> allies;
+	set<string> enemies;
+	set<string> allies;
 	float red, green, blue;
 	int shootPenalty, disablePenalty, destroyPenalty, boardPenalty;
 

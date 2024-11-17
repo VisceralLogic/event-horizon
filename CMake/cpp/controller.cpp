@@ -152,6 +152,7 @@ void Controller::initialize() {
 		"uniform vec3 lightDir;\n"
 		"uniform vec3 ambient;\n"
 		"uniform bool useLighting;\n"
+		"uniform bool useTexture;\n"
 		"void main() {\n"
 		"	if( useLighting ){"
 		// diffuse
@@ -169,8 +170,10 @@ void Controller::initialize() {
 		// result
 		"		vec4 sample = texture(tex, TexCoords);\n"
 		"		color = vec4(ambient + diffuse + specular, 1.0) * sample;\n"
-		"	} else {"
+		"	} else if( useTexture ){"
 		"		color = texture(tex, TexCoords);\n"
+		"	} else {"
+		"		color = vec4(ambient, 1.0);\n"
 		"	}"
 		"}\n";
 	shader = new GLShaderProgram(shaderVertSource, shaderFragSource);
@@ -179,10 +182,8 @@ void Controller::initialize() {
 void Controller::drawObject(SpaceObject *o) {
 	shader->use();
 	glm::mat4 view = glm::lookAt(pos, pos + vForward, vUp);
-	glm::mat4 model = glm::lookAt(o->pos, o->pos + o->vForward, o->vUp);
-	model = glm::scale(model, glm::vec3(o->size));
+	o->position();
 	shader->setUniformMat4("view",view);
-	shader->setUniformMat4("model", model);
 	shader->setUniformMat4("projection", GLShaderProgram::perspective);
 	shader->setUniformb("useLighting", true);
 	o->draw();
@@ -521,28 +522,27 @@ void Controller::update() {
 		slow = true;
 	/*if (NEW_PRESS(AUTO))	// autopilot
 		autopilot = !autopilot;
-	if (NEW_PRESS(SELECT)) {	// select next
+	*/if (NEWPRESS(SELECT)) {	// select next
 		planetIndex++;
-		if ([planets count] == planetIndex) {
+		if (planets.size() == planetIndex) {
 			planetIndex = -1;
 			curPlanet = NULL;
-		}
-		else {
-			curPlanet = [planets objectAtIndex : planetIndex];
+		} else {
+			curPlanet = planets[planetIndex];
 		}
 	}
-	if (NEW_PRESS(SELECT_SHIP)) {
+	if (NEWPRESS(SELECT_SHIP)) {
 		shipIndex++;
-		if (shipIndex < [ships count] && ([ships objectAtIndex : shipIndex] == sys || [sys->escorts containsObject : [ships objectAtIndex : shipIndex] ]))
+		if (shipIndex < ships.size() && (ships[shipIndex].get() == sys || find(sys->escorts.begin(), sys->escorts.end(), ships[shipIndex]) != sys->escorts.end()))
 			shipIndex++;
-		if ([ships count] <= shipIndex) {
+		if (ships.size() <= shipIndex) {
 			shipIndex = -1;
 			selection = NULL;
 		}
 		else
-			selection = [ships objectAtIndex : shipIndex];
+			selection = static_pointer_cast<AI>(ships[shipIndex]);
 	}
-	if (NEW_PRESS(SELECT_SYSTEM)) {
+	/*if (NEW_PRESS(SELECT_SYSTEM)) {
 		if (!hyper) {
 			systemIndex++;
 			if ([system->links count] <= systemIndex)
@@ -796,6 +796,7 @@ updateKeys:
 
 	shader->use();
 	shader->setUniformb("useLighting", true);
+	shader->setUniformb("useTexture", true);
 	shader->setUniform3f("viewPos", sys->pos.x, sys->pos.y, sys->pos.z);
 	shader->setUniform3f("lightDir", sys->system->lightDir.x, sys->system->lightDir.y, sys->system->lightDir.z);
 	shader->setUniform3f("ambient", sys->system->ambient.x, sys->system->ambient.y, sys->system->ambient.z);
@@ -838,13 +839,15 @@ updateKeys:
 	//[EHMenu update : keys] ;
 
 	if (curPlanet) {		// draw selection bracket
-		glColor3f(0, 1, 0);
+		shader->setUniformb("useTexture", false);
+		shader->setUniform3f("ambient", 0, 1, 0);
 		curPlanet->bracket();
 	}
 
 	if (selection)
 		selection->bracket();
 
+	shader->setUniformb("useTexture", true);
 	glDisable(GL_CULL_FACE); // draw transparent stuff
 
 	for ( shared_ptr<Spaceship> ship : ships ) {
@@ -882,54 +885,55 @@ updateKeys:
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	//if (viewStyle != 2) {
-	//	glColor3f(0, 1, 0);
-	//	if (selection) {	// draw ship stats
+	if (viewStyle != 2) {
+		float color[] = { 0, 1, 0 };
+		if (selection) {	// draw ship stats
 	//		string = [[NSString stringWithFormat : @"Shield: %d%% (%d)", 100 * (int)selection->shields / selection->maxShield, (int)selection->shields]cString];
 	//		[self drawString : string atX : 5 / 6. + 0.01 y : 1. * (screenHeight - screenWidth / 6 - 7.6 * screenWidth / 30 + 15) / screenHeight] ;
 	//		string = [[NSString stringWithFormat : @"Armor:  %d%% (%d)", 100 * selection->armor / selection->maxArmor, selection->armor]cString];
 	//		[self drawString : string atX : 5 / 6. + 0.01 y : 1. * (screenHeight - screenWidth / 6 - 7.6 * screenWidth / 30) / screenHeight] ;
 	//		string = [selection->name cString];
-	//	}
-	//	else
-	//		string = "<No Ship Selected>";
-	//	[self drawString : string atX : 5 / 6. + 0.01 y : 1. * (screenHeight - screenWidth / 6 - 3.6 * screenWidth / 30) / screenHeight] ;
-	//	if (selection)
-	//		[self drawString : [selection->gov->name cString] atX : 5 / 6. + 0.01 y : 1. * (screenHeight - screenWidth / 6 - 4 * screenWidth / 30) / screenHeight];
-	//	if (curPlanet) {		// draw planet name
-	//		if (centerOfRotation == curPlanet)
-	//			string = [[NSString stringWithFormat : @"%@ <ORB>", curPlanet->name]cString];
-	//		else string = [curPlanet->name cString];
-	//	}
-	//	else string = "<No Planet Selected>";
-	//	[self drawString : string atX : 5 / 6. + 0.01 y : 1. * (screenHeight - screenWidth / 6 - 2.6 * screenWidth / 30) / screenHeight] ;
-	//	if (x * x + z * z + y * y < jumpDistance && [system->planets count] > 0)
-	//		glColor3f(0, .5, 0);
-	//	if (systemIndex == -1)
-	//		string = "<No System Selected>";
-	//	else {
+		}
+		else
+			str = "<No Ship Selected>";
+		drawString(str.c_str(), 5 * screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 3.6 * screenWidth / 30.0f), color);
+		if (selection)
+			drawString(selection->gov->name.c_str(), 5 * screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 4 * screenWidth / 30.0f), color);
+		if (curPlanet) {		// draw planet name
+			str = curPlanet->name;
+			if (centerOfRotation == curPlanet)
+				str += " <ORB>";
+		}
+		else str = "<No Planet Selected>";
+		drawString(str.c_str(), 5*screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 5.6 * screenWidth / 30.0f), color);
+		if (pos.x * pos.x + pos.z * pos.z + pos.y * pos.y < jumpDistance && system->planets.size() > 0)
+			color[1] = 0.5f;
+		if (systemIndex == -1)
+			str = "<No System Selected>";
+		else {
 	//		if (systemIndex < 0)
 	//			NSLog(@"systemIndex = %d", systemIndex);
 	//		else if (systemIndex >= [system->links count])
 	//			NSLog(@"systemIndex = %d, exceeds limit = %d", systemIndex, [system->links count]);
-	//		string = [((Solarsystem*)[system->links objectAtIndex : systemIndex])->name cString];
-	//	}
-	//	[self drawString : string atX : 5 / 6. + 0.01 y : 1. * (screenHeight - screenWidth / 6 - 1.6 * screenWidth / 30) / screenHeight];
-	//	glColor3f(0, 1, 0);
-	//	if (secondaryIndex == -1)
-	//		string = "<No Secondary Weapon>";
-	//	else {
+			str = system->links[systemIndex]->name;
+		}
+		drawString(str.c_str(), 5 * screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 1.6 * screenWidth / 30.0f), color);
+		color[1] = 1.0f;
+		if (secondaryIndex == -1)
+			str = "<No Secondary Weapon>";
+		else {
 	//		Weapon* weap = ((Mod*)[secondary objectAtIndex : secondaryIndex])->ammo;
 	//		NSString* _name = [weap name];
 	//		int count = 0;
 	//		if (weap = [self hasMod : weap])
 	//			count = [weap count];
 	//		string = [[NSString stringWithFormat : @"%@: %d", _name, count]cString];
-	//	}
+		}
+		drawString(str.c_str(), 5 * screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 0.6f * screenWidth / 30.0f), color);
 	//	[self drawString : string atX : 5 / 6. + 0.01 y : 1. * (screenHeight - screenWidth / 6 - .6 * screenWidth / 30) / screenHeight];
 	//	if (!pause)
 	//		[self drawString : [[NSString stringWithFormat : @"FPS = %d", (int)(1. / FACTOR)]cString] atX : 0.005 y : 0.95];
-	//}
+	}
 
 	/*if (messageTime < 5 && message) {
 		if (full)

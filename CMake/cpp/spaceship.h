@@ -13,7 +13,7 @@ class Mod;
 class Cargo;
 class Government;
 
-class Spaceship : public Object3D, public EHObject {
+class Spaceship : public Object3D, public EHObject, public std::enable_shared_from_this<Spaceship> {
 public:
 	bool left = false, right = false, forward, slow, autopilot, orbit, hyperspace, land, fire, fireSecondary, up, down, throttleUp, throttleDown, afterburner;
 	shared_ptr<Planet> curPlanet;				// selected planet
@@ -75,7 +75,7 @@ public:
 	virtual void doHyperspace();
 	virtual void doLand();
 	void doFire(bool primary);
-	Spaceship* newInstance();
+	shared_ptr<Spaceship> newInstance();
 	void addMod(shared_ptr<Mod> mod);
 	Mod* hasMod();
 	void hitBy(shared_ptr<Weapon> weapon);

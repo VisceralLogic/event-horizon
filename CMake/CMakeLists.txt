@@ -14,6 +14,12 @@ project ("Event Horizon")
 set(SOURCES
     "ai.cpp"
     "ai.h"
+    "aiagressor.cpp"
+    "aiagressor.h"
+    "aimerchant.cpp"
+    "aimerchant.h"
+    "aiwimp.cpp"
+    "aiwimp.h"
     "asteroid.cpp"
     "asteroid.h"
     "background.cpp"

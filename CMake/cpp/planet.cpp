@@ -101,6 +101,13 @@ void Planet::finalize() {
 		setOrbit(SPACEOBJECT_ORIGIN);
 	}
 	initData.clear();
+	vUp.x = 0;
+	vUp.y = cos(pitch * pi / 180);
+	vUp.z = sin(pitch * pi / 180);
+	vForward.x = 1;
+	vForward.y = 0;
+	vForward.z = 0;
+	vRight = glm::normalize(glm::cross(vUp, vForward));
 }
 
 Planet::Planet() {
@@ -117,12 +124,7 @@ Planet::~Planet() {
 void Planet::draw() {
 	//if (!visible())
 	//	return;
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, pos);
-	model = glm::rotate(model, float(pitch * pi / 180), glm::vec3(1, 0, 0));
-	model = glm::rotate(model, float(angle * pi / 180), glm::vec3(0, 1, 0));
-	model = glm::scale(model, glm::vec3(size));
-	Controller::shader->setUniformMat4("model", model);
+	position();
 	if (this->model) {
 		this->model->draw();
 	}
@@ -153,6 +155,9 @@ void Planet::update() {
 	}
 	angle += deltaRot*sys->FACTOR;
 	atmosRot += atmosSpeed * sys->FACTOR;
+	glm::mat4 rot = glm::rotate(glm::mat4(1.0f), float(angle*pi/180), vUp);
+	vForward = glm::vec3(rot * glm::vec4(1, 0, 0, 1));
+	vRight = glm::normalize(glm::cross(vUp, vForward));
 }
 
 void Planet::orbit() {

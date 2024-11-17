@@ -6,6 +6,9 @@
 #include "controller.h"
 #include "plugin.h"
 #include "cargo.h"
+#include "aimerchant.h"
+#include "aiagressor.h"
+#include "aiwimp.h"
 #include <glm/ext/matrix_transform.hpp>
 
 #define sqr(x) ((x)*(x))
@@ -105,6 +108,20 @@ void Spaceship::finalize() {
 		}
 	}
 	initData.clear();
+}
+
+shared_ptr<Spaceship> Spaceship::newInstance() {
+	shared_ptr<AI> ship;
+	if( defaultAI == "MerchantAI" )
+		ship = make_shared<AIMerchant>();
+	else if (defaultAI == "AgressorAI")
+		ship = make_shared<AIAgressor>();
+	else /*if (defaultAI == "WimpAI")*/
+		ship = make_shared<AIWimp>();
+	ship->initWithShip(shared_from_this());
+	ship->state = ALIVE;
+
+	return ship;
 }
 
 void Spaceship::update() {
@@ -240,13 +257,13 @@ void Spaceship::update() {
 }
 
 void Spaceship::bracket() {
-	glColor3f(0, 1, 0);
-	if( sys->enemies.count(shared_ptr<Spaceship>(this)) )
-		glColor3f(1, 0, 0);
+	sys->shader->setUniform3f("ambient", 0, 1, 0);
+	if( sys->enemies.count(this->shared_from_this()) )
+		sys->shader->setUniform3f("ambient", 1, 0, 0);
 	else if (escortee.get() == sys)
-		glColor3f(1, 1, 0);
+		sys->shader->setUniform3f("ambient", 1, 1, 0);
 	if (state == DISABLED)
-		glColor3f(0.5, 0.5, 0.5);
+		sys->shader->setUniform3f("ambient", 0.5, 0.5, 0.5);
 	SpaceObject::bracket();
 }
 
@@ -270,20 +287,60 @@ void Spaceship::goSlow() {
 	throttledSpeed = 0;
 }
 
-void Spaceship::doAutopilot() {
+void Spaceship::doAutopilot() {	// point at selection
+	shared_ptr<SpaceObject> temp;
 
+	if (selection)
+		temp = static_pointer_cast<SpaceObject>(selection);
+	else if (curPlanet)
+		temp = static_pointer_cast<SpaceObject>(curPlanet);
+	if (temp) {
+		glm::vec3 local = globalToLocal(temp->pos);
+		if (local.z < 0)
+			left = true;
+		else
+			right = true;
+		if( local.y > 0 )
+			up = true;
+		else
+			down = true;
+		if (sqr(local.x) / (sqr(local.x) + sqr(local.y) + sqr(local.z)) > 0.999f) {
+			deltaPitch /= 2;
+			deltaRot /= 2;
+		}
+	}
+	else {
+		autopilot = false;
+	}
 }
 
 void Spaceship::doOrbit() {
-
+	float distanceSquared = sqr(pos.x - centerOfRotation->pos.x) + sqr(pos.z - centerOfRotation->pos.z) + sqr(pos.y - centerOfRotation->pos.y);
+	float a = sys->GRAVITY * centerOfRotation->mass / distanceSquared / 75;
+	float _theta = atan2(centerOfRotation->pos.z - pos.z, centerOfRotation->pos.x - pos.x);
+	float phi = atan2(centerOfRotation->pos.y - pos.y, sqrt(sqr(pos.x - centerOfRotation->pos.x) + sqr(pos.z - centerOfRotation->pos.z)));
+	velocity.x += a * sys->FACTOR * cos(_theta) * cos(phi);
+	velocity.z += a * sys->FACTOR * sin(_theta) * cos(phi);
+	velocity.y += a * sys->FACTOR * sin(phi);
 }
 
 void Spaceship::toggleOrbit() {
-
+	if (curPlanet && curPlanet != centerOfRotation)
+		setOrbit(curPlanet);
+	else
+		centerOfRotation = nullptr;
 }
 
 void Spaceship::doHyperspace() {
-
+	hyperTime += sys->FACTOR;
+	if (hyperTime > 5.0f) {
+		state = DEAD;
+		if (sys->selection.get() == this) {
+			sys->selection.reset();
+			sys->shipIndex = -1;
+		}
+	}
+	sys->enemies.erase(this->shared_from_this());
 }
 
 void Spaceship::doLand() {
@@ -295,7 +352,16 @@ void Spaceship::doFire(bool primary) {
 }
 
 void Spaceship::throttle(bool forward) {
-
+	if (forward) {
+		throttledSpeed += MAX_VELOCITY * sys->FACTOR * 0.333f;
+		if (throttledSpeed > MAX_VELOCITY)
+			throttledSpeed = MAX_VELOCITY;
+	}
+	else {
+		throttledSpeed -= MAX_VELOCITY * sys->FACTOR * 0.333f;
+		if (throttledSpeed < 0)
+			throttledSpeed = 0;
+	}
 }
 
 void Spaceship::doAfterburner() {
@@ -316,4 +382,12 @@ void Spaceship::goDown() {
 
 void Spaceship::addMod(shared_ptr<Mod> mod) {
 
+}
+
+bool Spaceship::addEnemy(shared_ptr<Spaceship> enemy) {
+	if (!enemies.count(enemy)) {
+		enemies.insert(enemy);
+		return true;
+	}
+	return false;
 }

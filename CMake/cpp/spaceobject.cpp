@@ -9,6 +9,7 @@
 // static variables
 shared_ptr<SpaceObject> SpaceObject::SPACEOBJECT_ORIGIN;
 Sphere* SpaceObject::sphereObj;
+GLuint SpaceObject::bracketVAO, SpaceObject::bracketVBO;
 Controller* sys;
 
 constexpr double HOLE_FACTOR = 1.67;
@@ -17,6 +18,45 @@ constexpr double SCALE_FACTOR = 1.1;
 void SpaceObject::initialize() {
 	SPACEOBJECT_ORIGIN = make_shared<SpaceObject>();
 	sphereObj = new Sphere(20, 20);
+
+	float vertex[] = {
+		1/HOLE_FACTOR, 1, 1,
+		-1 / HOLE_FACTOR, 1, 1,
+		1, 1 / HOLE_FACTOR, 1,
+		1, -1 / HOLE_FACTOR, 1,
+		1, 1, 1 / HOLE_FACTOR,
+		1, 1, -1 / HOLE_FACTOR,
+
+		-1 / HOLE_FACTOR, -1, -1,
+		1 / HOLE_FACTOR, -1, -1,
+		-1, -1 / HOLE_FACTOR, -1,
+		-1, 1 / HOLE_FACTOR, -1,
+		-1, -1, -1 / HOLE_FACTOR,
+		-1, -1, 1 / HOLE_FACTOR,
+
+		-1, 1 / HOLE_FACTOR, 1,
+		-1, -1 / HOLE_FACTOR, 1,
+		-1, 1, 1 / HOLE_FACTOR,
+		-1, 1, -1 / HOLE_FACTOR,
+
+		1 / HOLE_FACTOR, -1, 1,
+		-1 / HOLE_FACTOR, -1, 1,
+		1, -1, 1 / HOLE_FACTOR,
+		1, -1, -1 / HOLE_FACTOR,
+
+		1 / HOLE_FACTOR, 1, -1,
+		-1 / HOLE_FACTOR, 1, -1,
+
+		1, 1 / HOLE_FACTOR, -1,
+		1, -1 / HOLE_FACTOR, -1
+	};
+	glGenBuffers(1, &bracketVBO);
+	glGenVertexArrays(1, &bracketVAO);
+	glBindVertexArray(bracketVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, bracketVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 }
 
 SpaceObject::SpaceObject() {
@@ -35,9 +75,9 @@ void SpaceObject::loadTextures(const vector<string>& files) {
 }
 
 void SpaceObject::bracket() {
-	this->position();
+	position();
 	glBindTexture(GL_TEXTURE_2D, 0);
-	size *= SCALE_FACTOR;
+	/*size *= SCALE_FACTOR;
 	glBegin(GL_LINES);
 	glVertex3f(size / HOLE_FACTOR, size, size);
 	glVertex3f(-size / HOLE_FACTOR, size, size);
@@ -70,7 +110,9 @@ void SpaceObject::bracket() {
 	glVertex3f(size, -size / HOLE_FACTOR, -size);
 	glEnd();
 	size /= SCALE_FACTOR;
-	glColor3f(1, 1, 1);
+	glColor3f(1, 1, 1);*/
+	glBindVertexArray(bracketVAO);
+	glDrawArrays(GL_LINES, 0, 42);
 }
 
 void SpaceObject::setOrbit(shared_ptr<SpaceObject> center) {
@@ -131,46 +173,31 @@ void SpaceObject::bounce(shared_ptr<SpaceObject> sphere) {
 }
 
 void SpaceObject::position() {
-	//if (sys->viewStyle == 0) {
-	//	glLoadIdentity();
-	//	glRotated(-sys->pitch, 1, 0, 0);
-	//	glRotated(-sys->roll, 0, 0, 1);
-	//	glRotated(-sys->angle, 0, 1, 0);			// sys angle
-	//	glTranslated(x - sys->x, y - sys->y, sys->z - z);	// position self
-	//	glRotated(angle, 0, 1, 0);				// rotate to own angle
-	//	glRotated(roll, 0, 0, 1);
-	//	glRotated(pitch, 1, 0, 0);
-	//}
-	//else if (sys->viewStyle == 1) {
-	//	glLoadIdentity();
-	//	glRotated(-sys->angle, 0, 0, 1);
-	//	glTranslated((x - sys->x), (z - sys->z), -15 - sys->y + y);
-	//	glRotated(angle, 0, 0, 1);
-	//	glRotated(90, 1, 0, 0);
-	//}
-	//else if (sys->viewStyle == 2) {
-	//	glLoadIdentity();
-	//	glRotated(sys->pitch, 1, 0, 0);
-	//	glRotated(sys->roll, 0, 0, 1);
-	//	glRotated(180 - sys->angle, 0, 1, 0);
-	//	glTranslated(x - sys->x, y - sys->y, sys->z - z);
-	//	glRotated(angle, 0, 1, 0);
-	//	glRotated(roll, 0, 0, 1);
-	//	glRotated(pitch, 1, 0, 0);
-	//}
-	//else if (sys->viewStyle == 3) {
-	//	glLoadIdentity();
-	//	glTranslated(0, -sys->size, -5 * sys->size);
-	//	glRotated(sys->deltaRot / 10, 0, 1, 0);
-	//	glRotated(sys->deltaPitch / 10, 1, 0, 0);
-	//	glRotated(-sys->pitch, 1, 0, 0);
-	//	glRotated(-sys->roll, 0, 0, 1);
-	//	glRotated(-sys->angle, 0, 1, 0);
-	//	glTranslated(x - sys->x, y - sys->y, sys->z - z);
-	//	glRotated(angle, 0, 1, 0);
-	//	glRotated(roll, 0, 0, 1);
-	//	glRotated(pitch, 1, 0, 0);
-	//}
+	//glm::mat4 model = glm::lookAt(pos, pos + vForward, vUp);
+	/*glm::mat4 model = glm::mat4(1.0f);
+	model[0][0] = vRight.x;
+	model[1][0] = vRight.y;
+	model[2][0] = vRight.z;
+
+	model[0][1] = vUp.x;
+	model[1][1] = vUp.y;
+	model[2][1] = vUp.z;
+
+	model[0][2] = -vForward.x;
+	model[1][2] = -vForward.y;
+	model[2][2] = -vForward.z;
+
+	model[3][0] = pos.x;
+	model[3][1] = pos.y;
+	model[3][2] = pos.z;
+	model = glm::scale(model, glm::vec3(size));
+	Controller::shader->setUniformMat4("model", model);*/
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, pos);
+	model = glm::rotate(model, float(pitch * pi / 180), glm::vec3(1, 0, 0));
+	model = glm::rotate(model, float(angle * pi / 180), glm::vec3(0, 1, 0));
+	model = glm::scale(model, glm::vec3(size));
+	Controller::shader->setUniformMat4("model", model);
 }
 
 double SpaceObject::getDistance(shared_ptr<SpaceObject> other) {

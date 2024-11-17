@@ -94,7 +94,7 @@ public:
 	vector<shared_ptr<Asteroid>> asteroids;
 	vector<shared_ptr<Mission>> missions;
 
-	int planetIndex;
+	int planetIndex = -1;
 	int shipIndex;
 
 	float FACTOR = 0;	// multiply by for varying FPS
@@ -112,7 +112,7 @@ public:
 	float shipCheckDelta;			// how much to increase shipCheckTime
 	chrono::system_clock::time_point date;					// game date
 	bool paused = false;						// pause the game
-	map<int, int> govRecord;	// key: gov ID, value: number reflecting position with regard to that government
+	map<string, int> govRecord;	// key: gov ID, value: number reflecting position with regard to that government
 	float floatVal[END_OF_FLOATS];		// pref values stored here
 	int combatRating;				// combat experience rating
 	//FSInterpreter* interpreter;		// use for FScripts

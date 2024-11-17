@@ -22,6 +22,7 @@ public:
 	static shared_ptr<SpaceObject> SPACEOBJECT_ORIGIN;
 	static Sphere* sphereObj;
 	static constexpr double pi = 3.14159265358979323846;
+	static GLuint bracketVAO, bracketVBO;
 
 	double MAX_ANGULAR_VELOCITY = 1;		// maximum rate of rotation
 	double ANGULAR_ACCELERATION = 1;		// rate of increase of rotation

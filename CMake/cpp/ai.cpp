@@ -6,7 +6,7 @@
 #include "cargo.h"
 #include "mod.h"
 
-AI::AI(shared_ptr<Spaceship> ship) {
+void AI::initWithShip(shared_ptr<Spaceship> ship) {
 	name = ship->name;
 	MAX_VELOCITY = ship->MAX_VELOCITY;
 	ANGULAR_ACCELERATION = ship->ANGULAR_ACCELERATION;
@@ -18,7 +18,7 @@ AI::AI(shared_ptr<Spaceship> ship) {
 	cargoSpace = ship->cargoSpace;
 	modSpace = ship->modSpace;
 	srand(time(NULL));
-	money = ship->price / 4 * rand() / RAND_MAX;
+	money = rand() % (ship->price/4);
 	for (auto& el : ship->initData.items() ) {
 		int num = el.value();
 		for (int i = 0; i < num; i++) {
@@ -122,7 +122,6 @@ void AI::draw() {
 		if (sys->t - startExplode > 2.5)
 			return;
 	}
-	//glBindTexture(GL_TEXTURE_2D, texture[0]);
 	Spaceship::draw();
 }
 
@@ -147,9 +146,9 @@ void AI::navigate(vector<shared_ptr<Planet>>& objects) {
 		if (planet.get() == target.get())
 			return;
 
-		_distance = sqrt(sqr(planet->pos.x - pos.x) + sqr(planet->pos.z - pos.z));
-		dotProduct = velocity.x*(planet->pos.x - pos.x) + velocity.z * (planet->pos.z - pos.z);
-		if ((dotProduct > 0) && (_distance < 5 + size + planet->size) && sqr(planet->pos.y - pos.y) < sqr(size + planet->size)) {
+		_distance = sqrt(sqr(planet->pos.x - pos.x) + sqr(planet->pos.z - pos.z) + sqr(planet->pos.y - pos.y));
+		dotProduct = velocity.x*(planet->pos.x - pos.x) + velocity.z * (planet->pos.z - pos.z) + velocity.y * (planet->pos.y - pos.y);
+		if ((dotProduct > 0) && (_distance < 5 + size + planet->size)) {
 			// we're approaching it and it is less than 5 units distance
 			float approach = dotProduct / _distance;	// length of velocity vector point at ob
 			float theta = asin(approach / sqrt(sqr(velocity.x) + sqr(velocity.z))) + pi * angle / 180;
@@ -160,8 +159,6 @@ void AI::navigate(vector<shared_ptr<Planet>>& objects) {
 				_distance = 0.1;
 			_distance *= MAX_VELOCITY;
 			if (approach > _distance) {
-				//speedx -= (approach-distance)*cos( theta );
-				//speedz -= (approach-distance)*sin( theta );
 				slow = true;
 				if (pos.y >= planet->pos.y)
 					up = true;
@@ -174,13 +171,13 @@ void AI::navigate(vector<shared_ptr<Planet>>& objects) {
 
 void AI::actionLand() {
 	if (!target) {
-		float num = (float)rand() * sys->planets.size() / RAND_MAX;
+		float num = rand() % sys->planets.size();
 		target = sys->planets[num];
 		curPlanet = static_pointer_cast<Planet>(target);
 	}
 
 	autopilot = true;
-	distance = sqrt(sqr(pos.x - curPlanet->pos.x) + sqr(pos.z - curPlanet->pos.z)) - curPlanet->size - size;
+	distance = sqrt(sqr(pos.x - curPlanet->pos.x) + sqr(pos.z - curPlanet->pos.z) + sqr(pos.y - curPlanet->pos.y)) - curPlanet->size - size;
 	if (!centerOfRotation)
 		orbit = true;
 	forward = true;
@@ -197,8 +194,7 @@ void AI::actionLand() {
 
 void AI::actionLeave() {
 	if (!target) {
-		float num = ((float)rand()) / RAND_MAX * sys->system->links.size();
-		target = sys->system->links[num];
+		target = sys->system->links[rand() % sys->system->links.size()];
 		angle = 180. / pi * atan2(static_pointer_cast<Solarsystem>(target)->z - sys->system->z, static_pointer_cast<Solarsystem>(target)->x - sys->system->x);
 	}
 
