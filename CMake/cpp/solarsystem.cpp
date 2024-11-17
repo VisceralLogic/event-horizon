@@ -78,7 +78,7 @@ void Solarsystem::setUp() {
 	}
 	sys->planets = planets;
 	for (i = 0; i < shipCount; i++) {
-		shared_ptr<AI> tempShip = types->newInstance();
+		shared_ptr<Spaceship> tempShip = types->newInstance();
 		tempShip->pos.x = 60.0f - (120.0f * rand()) / RAND_MAX;
 		tempShip->pos.z = 60.0f - (120.0f * rand()) / RAND_MAX;
 		tempShip->pos.y = 60.0f - (120.0f * rand()) / RAND_MAX;

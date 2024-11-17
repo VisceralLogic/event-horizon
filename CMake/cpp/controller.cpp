@@ -444,7 +444,7 @@ void Controller::update() {
 		threadTime = FACTOR;*/
 
 	if (t > shipCheckTime) {
-		shared_ptr<AI> tempShip = system->types->newInstance();
+		shared_ptr<Spaceship> tempShip = system->types->newInstance();
 		int delta = system->shipCount - ships.size();
 		tempShip->pos.x = 60 - (120.0f * rand()) / RAND_MAX;
 		tempShip->pos.y = 60 - (120.0f * rand()) / RAND_MAX;
