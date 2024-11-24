@@ -17,7 +17,6 @@ void AI::initWithShip(shared_ptr<Spaceship> ship) {
 	thrust = ship->thrust;
 	cargoSpace = ship->cargoSpace;
 	modSpace = ship->modSpace;
-	srand(time(NULL));
 	money = rand() % (ship->price/4);
 	for (auto& el : ship->initData.items() ) {
 		int num = el.value();
@@ -45,6 +44,7 @@ void AI::initWithShip(shared_ptr<Spaceship> ship) {
 	ACCELERATION = thrust / (mass * compensation);
 	texNum = ship->texNum;
 	rechargeRate = ship->rechargeRate;
+	objects = ship->objects;
 }
 
 void AI::update() {
@@ -122,6 +122,7 @@ void AI::draw() {
 		if (sys->t - startExplode > 2.5)
 			return;
 	}
+	position();
 	Spaceship::draw();
 }
 

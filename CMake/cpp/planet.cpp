@@ -122,8 +122,8 @@ Planet::~Planet() {
 }
 
 void Planet::draw() {
-	//if (!visible())
-	//	return;
+	if (!visible())
+		return;
 	position();
 	if (this->model) {
 		this->model->draw();

@@ -47,7 +47,7 @@ public:
 	shared_ptr<Spaceship> escortee;			// spaceship to escort
 	vector<shared_ptr<AI>> escorts;		// array of escorting ships
 	string weaponID;				// ID of weapon, if bay-launched
-	bool bound;						// strict escortee control
+	bool bound = false;				// strict escortee control
 	float compensation;				// amount of inertial compensation
 	bool useThrottle;				// is the throttle engaged?
 	float throttledSpeed;			// the desired speed

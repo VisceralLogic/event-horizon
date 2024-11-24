@@ -77,40 +77,6 @@ void SpaceObject::loadTextures(const vector<string>& files) {
 void SpaceObject::bracket() {
 	position();
 	glBindTexture(GL_TEXTURE_2D, 0);
-	/*size *= SCALE_FACTOR;
-	glBegin(GL_LINES);
-	glVertex3f(size / HOLE_FACTOR, size, size);
-	glVertex3f(-size / HOLE_FACTOR, size, size);
-	glVertex3f(size, size / HOLE_FACTOR, size);
-	glVertex3f(size, -size / HOLE_FACTOR, size);
-	glVertex3f(size, size, size / HOLE_FACTOR);
-	glVertex3f(size, size, -size / HOLE_FACTOR);
-
-	glVertex3f(-size / HOLE_FACTOR, -size, -size);
-	glVertex3f(size / HOLE_FACTOR, -size, -size);
-	glVertex3f(-size, -size / HOLE_FACTOR, -size);
-	glVertex3f(-size, size / HOLE_FACTOR, -size);
-	glVertex3f(-size, -size, -size / HOLE_FACTOR);
-	glVertex3f(-size, -size, size / HOLE_FACTOR);
-
-	glVertex3f(-size, size / HOLE_FACTOR, size);
-	glVertex3f(-size, -size / HOLE_FACTOR, size);
-	glVertex3f(-size, size, size / HOLE_FACTOR);
-	glVertex3f(-size, size, -size / HOLE_FACTOR);
-
-	glVertex3f(size / HOLE_FACTOR, -size, size);
-	glVertex3f(-size / HOLE_FACTOR, -size, size);
-	glVertex3f(size, -size, size / HOLE_FACTOR);
-	glVertex3f(size, -size, -size / HOLE_FACTOR);
-
-	glVertex3f(size / HOLE_FACTOR, size, -size);
-	glVertex3f(-size / HOLE_FACTOR, size, -size);
-
-	glVertex3f(size, size / HOLE_FACTOR, -size);
-	glVertex3f(size, -size / HOLE_FACTOR, -size);
-	glEnd();
-	size /= SCALE_FACTOR;
-	glColor3f(1, 1, 1);*/
 	glBindVertexArray(bracketVAO);
 	glDrawArrays(GL_LINES, 0, 42);
 }
@@ -212,11 +178,11 @@ glm::vec3 SpaceObject::globalToLocal(const glm::vec3& v) {
 bool SpaceObject::visible() {
 	glm::vec3 local = sys->globalToLocal(pos);
 	if (sys->viewStyle == 0) {
-		if (local.x < -size * 1.9)
+		if (local.z > size)
 			return false;
 	}
 	else if (sys->viewStyle == 2) {
-		if (local.x > size * 1.9)
+		if (local.z < size)
 			return false;
 	}
 	return true;

@@ -103,8 +103,14 @@ void Controller::initialize() {
 		"layout(location = 0) in vec2 vertex;\n"
 		"layout(location = 1) in vec3 attrib;\n"
 		"out vec3 Attrib;\n"
+		"uniform vec3 box;\n"
+		"uniform bool useBox;\n"
 		"void main() {\n"
-		"	gl_Position = vec4(vertex.x, vertex.y, 0.0, 1.0);\n"
+		"	if( useBox ){\n"
+		"		gl_Position = vec4(vertex.x * box.z + box.x, vertex.y * box.z + box.y, 0.0, 1.0);\n"
+		"	} else {\n"
+		"		gl_Position = vec4(vertex.x, vertex.y, 0.0, 1.0);\n"
+		"	}\n"
 		"	Attrib = attrib;\n"
 		"}\n";
 	string shaderFragSource = "#version 330 core\n"
@@ -542,6 +548,12 @@ void Controller::update() {
 		else
 			selection = static_pointer_cast<AI>(ships[shipIndex]);
 	}
+	if (keyMap[SDL_SCANCODE_D] && !oldKeys[SDL_SCANCODE_D]) {
+		if (curPlanet) {
+			glm::vec3 out = globalToLocal(curPlanet->pos);
+			cout << out.x << " " << out.y << " " << out.z << endl;
+		}
+	}
 	/*if (NEW_PRESS(SELECT_SYSTEM)) {
 		if (!hyper) {
 			systemIndex++;
@@ -586,31 +598,26 @@ void Controller::update() {
 		else
 			viewStyle = 0;
 	}
-	/*if (NEW_PRESS(SELECT_AT)) {
+	if (NEWPRESS(SELECT_AT)) {
 		int i;
-		Spaceship* ship = nil;
 		float dist = -1;
 
-		for (i = 0; i < [ships count]; i++) {
-			Spaceship* temp = [ships objectAtIndex : i];
+		for (i = 0; i < ships.size(); i++) {
+			shared_ptr<Spaceship> ship = ships[i];
 			float d;
 
-			_x = temp->x;
-			_y = temp->y;
-			_z = temp->z;
-			[self globalToLocal] ;
-			if (_x < 0 || temp == sys || [sys->escorts containsObject : temp])
+			glm::vec3 local = globalToLocal(ship->pos);
+			if (local.z > 0 || ship.get() == this || count(escorts.begin(), escorts.end(), ship))
 				continue;
-			d = (_z * _z + _y * _y) / (_x * _x);
+			d = (sqr(local.x) + sqr(local.y)) / sqr(local.z);
 			if (dist == -1 || d < dist) {
 				dist = d;
-				ship = temp;
+				selection = static_pointer_cast<AI>(ship);
+				shipIndex = i;
 			}
 		}
-		selection = ship;
-		shipIndex = [ships indexOfObject : ship];
 	}
-	if (NEW_PRESS(BOARD) && selection) {
+	/*if (NEW_PRESS(BOARD) && selection) {
 		if (selection->state == DISABLED) {
 			if ([self distance : selection] < (self->size + selection->size + 0.25))
 				setUpBoard();
@@ -645,8 +652,6 @@ void Controller::update() {
 	else if (oldKeys[index[DOWN]] & val[DOWN]) {
 		killVertRot = YES;
 	}
-	if (NEW_PRESS(FULL))
-		toggleFull = YES;
 	if (keys[index[THROTTLE_UP]] & val[THROTTLE_UP])
 		throttleUp = YES;
 	if (keys[index[THROTTLE_DOWN]] & val[THROTTLE_DOWN])
@@ -779,11 +784,11 @@ updateKeys:
 	for (i = 0; i < planets.size(); i++) {
 		planets[i]->update();
 	}
-	/*for (shared_ptr<Spaceship> ship : ships) {
+	for (shared_ptr<Spaceship> ship : ships) {
 		if (ship.get() != sys )
 			ship->update();
 	}
-	for (shared_ptr<Asteroid> asteroid : asteroids) {
+	/*for (shared_ptr<Asteroid> asteroid : asteroids) {
 		asteroid->update();
 	}
 	for (shared_ptr<Weapon> weap : weapons) {
@@ -810,8 +815,7 @@ updateKeys:
 		planets[i]->draw();
 	}
 
-	for ( shared_ptr<Spaceship> ship : ships ) {
-		shared_ptr<Spaceship> ship = ships[i];
+	for ( shared_ptr<Spaceship>& ship : ships ) {
 		if (ship->state != DEAD) {
 			if (ship.get() != this) {
 				ship->draw();
@@ -838,8 +842,8 @@ updateKeys:
 
 	//[EHMenu update : keys] ;
 
+	shader->setUniformb("useTexture", false);
 	if (curPlanet) {		// draw selection bracket
-		shader->setUniformb("useTexture", false);
 		shader->setUniform3f("ambient", 0, 1, 0);
 		curPlanet->bracket();
 	}
@@ -905,16 +909,12 @@ updateKeys:
 				str += " <ORB>";
 		}
 		else str = "<No Planet Selected>";
-		drawString(str.c_str(), 5*screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 5.6 * screenWidth / 30.0f), color);
+		drawString(str.c_str(), 5*screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 2.6 * screenWidth / 30.0f), color);
 		if (pos.x * pos.x + pos.z * pos.z + pos.y * pos.y < jumpDistance && system->planets.size() > 0)
 			color[1] = 0.5f;
 		if (systemIndex == -1)
 			str = "<No System Selected>";
 		else {
-	//		if (systemIndex < 0)
-	//			NSLog(@"systemIndex = %d", systemIndex);
-	//		else if (systemIndex >= [system->links count])
-	//			NSLog(@"systemIndex = %d, exceeds limit = %d", systemIndex, [system->links count]);
 			str = system->links[systemIndex]->name;
 		}
 		drawString(str.c_str(), 5 * screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 1.6 * screenWidth / 30.0f), color);
@@ -930,9 +930,10 @@ updateKeys:
 	//		string = [[NSString stringWithFormat : @"%@: %d", _name, count]cString];
 		}
 		drawString(str.c_str(), 5 * screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 0.6f * screenWidth / 30.0f), color);
-	//	[self drawString : string atX : 5 / 6. + 0.01 y : 1. * (screenHeight - screenWidth / 6 - .6 * screenWidth / 30) / screenHeight];
-	//	if (!pause)
-	//		[self drawString : [[NSString stringWithFormat : @"FPS = %d", (int)(1. / FACTOR)]cString] atX : 0.005 y : 0.95];
+		/*if (!paused && FACTOR > 0.0f) {
+			str = "FPS = " + (int)(1.0f / FACTOR);
+			drawString(str.c_str(), 0.005, 0.95, color);
+		}*/
 	}
 
 	/*if (messageTime < 5 && message) {
@@ -947,6 +948,14 @@ updateKeys:
 		state = DEAD;
 
 	//[SoundManager update] ;
+}
+
+void Controller::debug() {
+	for (int i = 0; i < ships.size(); i++) {
+		shared_ptr<Spaceship>& ship = ships[i];
+		if (isnan(ship->pos.x))
+			throw("nan");
+	}
 }
 
 glm::mat4& Controller::viewMatrix() {
@@ -1071,6 +1080,7 @@ void Controller::pause() {
 void Controller::drawFrame() {
 	frameShader->use();
 	frameShader->setUniformb("useTexture", false);
+	frameShader->setUniformb("useBox", false);
 	glBindVertexArray(frameVAO);
 	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
@@ -1080,20 +1090,103 @@ void Controller::drawNavTab() {
 	glViewport(5 * screenWidth / 6, screenHeight - screenWidth / 6, screenWidth / 6 + 1, screenWidth / 6);
 	frameShader->use();
 	frameShader->setUniformb("useTexture", true);
+	frameShader->setUniformb("useBox", false);
 	frameShader->setUniform3f("color", 1.0f, 1.0f, 1.0f);
 	glBindTexture(GL_TEXTURE_2D, texture[NAVPANEL_TEXTURE]);
 	glBindVertexArray(squareVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glBindTexture(GL_TEXTURE_2D, texture[NAVPLANET_TEXTURE]);
+	frameShader->setUniformb("useBox", true);
+	for (shared_ptr<Planet>& planet : planets) {
+		float _size = .02f * planet->size;
+		frameShader->setUniform3f("color", 0, 0, 0.5f);
+		glm::vec3 _pos = globalToLocal(planet->pos);
+		if (_pos.z > 0)
+			continue;
+
+		if (_size > .03f)
+			_size = .03f;
+		else if (_size < .015f)
+			_size = .015f;
+		if (planet == curPlanet) {
+			_size *= 1.5f;
+			frameShader->setUniform3f("color", 1, 1, 0.5f);
+		}
+		frameShader->setUniform3f("box", .9 * sin(atan(-_pos.x / _pos.z)) * cos(atan(_pos.y / sqrt(sqr(_pos.x) + sqr(_pos.z)))), .9 * sin(atan(_pos.y / sqrt(sqr(_pos.x) + sqr(_pos.z)))), _size);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+
+	for (shared_ptr<Spaceship>& ship : ships) {
+		bool enemy = enemies.count(ship) > 0;
+		float _size = .02f * ship->size;
+		frameShader->setUniform3f("color", 0, 0.5f, 0);
+		if( enemy )
+			frameShader->setUniform3f("color", 0.5f, 0, 0);
+		if (ship->escortee.get() == this)
+			frameShader->setUniform3f("color", 0.5f, 0.5f, 0);
+		if( ship->state == DISABLED )
+			frameShader->setUniform3f("color", 0.5f, 0.5f, 0.5f);
+
+		glm::vec3 _pos = globalToLocal(ship->pos);
+		if (_pos.z > 0)
+			continue;
+
+		if( _size > .02f )
+			_size = .02f;
+		else if (_size < .01f)
+			_size = .01f;
+
+		if (ship == selection) {
+			_size *= 1.5f;
+			frameShader->setUniform3f("color", (1.0f+cos(10*t))/2, 1, (1.0f+cos(10*t))/2);
+			if (enemy)
+				frameShader->setUniform3f("color", 1, (1. + cos(10 * t)) / 2, (1. + cos(10 * t)) / 2);
+			if (ship->escortee.get() == this)
+				frameShader->setUniform3f("color", 1, 1, (1. + cos(10 * t)) / 2);
+			if (ship->state == DISABLED)
+				frameShader->setUniform3f("color", (1 + cos(10 * t)) / 2, (1 + cos(10 * t)) / 2, (1 + cos(10 * t)) / 2);
+		}
+		frameShader->setUniform3f("box", .9 * sin(atan(-_pos.x / _pos.z)) * cos(atan(_pos.y / sqrt(sqr(_pos.x) + sqr(_pos.z)))), .9 * sin(atan(_pos.y / sqrt(sqr(_pos.x) + sqr(_pos.z)))), _size);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+
+	frameShader->setUniform3f("color", 0, 1, 1);
+	frameShader->setUniform3f("box", 0, 0, 0.02f);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glViewport(0, 0, screenWidth, screenHeight);
 }
 
 void Controller::drawSelectionTab(int tab) {
-
+	glViewport(5 * screenWidth / 6, screenHeight - screenWidth / 6 - tab * (screenWidth / 30), screenWidth / 6 + 1, screenWidth / 5. - screenWidth / 6.);
+	glBindTexture(GL_TEXTURE_2D, texture[WIDGET_TEXTURE]);
+	frameShader->use();
+	frameShader->setUniformb("useTexture", true);
+	frameShader->setUniformb("useBox", false);
+	frameShader->setUniform3f("color", 1.0f, 1.0f, 1.0f);
+	glBindVertexArray(squareVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glViewport(0, 0, screenWidth, screenHeight);
 }
 
 void Controller::drawInfoTab() {
+	glViewport(5 * screenWidth / 6, screenHeight - 13 * screenWidth / 30, screenWidth / 6 + 1, screenWidth / 6 + 1);
+	glBindTexture(GL_TEXTURE_2D, texture[INFOTAB_TEXTURE]);
+	frameShader->use();
+	frameShader->setUniformb("useTexture", true);
+	frameShader->setUniformb("useBox", false);
+	frameShader->setUniform3f("color", 1.0f, 1.0f, 1.0f);
+	glBindVertexArray(squareVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	if (selection) {
+
+	}
+
+	glViewport(0, 0, screenWidth, screenHeight);
 }
 
 void Controller::setUpFrame() {

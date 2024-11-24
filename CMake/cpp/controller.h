@@ -142,6 +142,7 @@ public:
 	void doLand();
 	bool functionKey();	// utility function to see if "map" or "inventory" key pressed"
 	void pause();
+	void debug();
 
 	// graphics
 	void setUpFrame();

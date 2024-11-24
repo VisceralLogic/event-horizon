@@ -45,8 +45,8 @@ bool setup() {
     }
 
     SDL_GetDisplayBounds(0, &displayBounds);
-    gScreenWidth = 1280;// displayBounds.w;
-    gScreenHeight = 800;// displayBounds.h;
+    gScreenWidth = 1280;    // displayBounds.w;
+    gScreenHeight = 800;    // displayBounds.h;
 
     // Create a window
     window = SDL_CreateWindow("Event Horizon", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gScreenWidth, gScreenHeight, /*SDL_WINDOW_FULLSCREEN_DESKTOP |*/ SDL_WINDOW_OPENGL);
