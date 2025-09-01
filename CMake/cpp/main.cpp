@@ -36,6 +36,10 @@ void initGL() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+uint64_t getCurrentTimeMicroseconds() {
+    return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
 bool setup() {
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -45,11 +49,11 @@ bool setup() {
     }
 
     SDL_GetDisplayBounds(0, &displayBounds);
-    gScreenWidth = 1280;    // displayBounds.w;
-    gScreenHeight = 800;    // displayBounds.h;
+    gScreenWidth = displayBounds.w;
+    gScreenHeight = displayBounds.h;
 
     // Create a window
-    window = SDL_CreateWindow("Event Horizon", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gScreenWidth, gScreenHeight, /*SDL_WINDOW_FULLSCREEN_DESKTOP |*/ SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("Event Horizon", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gScreenWidth, gScreenHeight, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL);
     if (!window)
     {
         SDL_Log("Unable to create window: %s", SDL_GetError());
@@ -93,7 +97,7 @@ bool setup() {
 
     beginPlayer();
 
-	u1 = SDL_GetTicks64();
+	u1 = getCurrentTimeMicroseconds();
 
     return true;
 }
@@ -118,12 +122,8 @@ void doUpdate() {
     SDL_GL_SwapWindow(window);
 
 	if (sys != nullptr) {
-        t1 = SDL_GetTicks64();
-        if (t1 == u1) {
-			SDL_Delay(1);
-			t1 = SDL_GetTicks64();
-        }
-		sys->FACTOR = (t1 - u1) / 1000.0f;
+        t1 = getCurrentTimeMicroseconds();
+		sys->FACTOR = (t1 - u1) / 1000000.0f;
 		u1 = t1;
         if (sys->paused)
             sys->FACTOR = 0;

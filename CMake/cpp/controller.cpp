@@ -135,9 +135,11 @@ void Controller::initialize() {
 		"uniform mat4 projection;\n"
 		"uniform mat4 view;\n"
 		"uniform mat4 model;\n"
+		"uniform float hyperTime;\n"
 		"out vec2 TexCoords;\n"
 		"out vec3 FragPos;\n"
 		"out vec3 Normal;\n"
+		"out float Distance;\n"
 		"void main() {\n"
 		"	float near = 0.1;"
 		"	float far = 500;"
@@ -145,43 +147,54 @@ void Controller::initialize() {
 		"	Normal = mat3(transpose(inverse(model))) * normal;\n"
 		"	FragPos = vec3(model * vec4(vertex, 1.0));\n"
 		"	gl_Position = projection * view * vec4(FragPos, 1.0);\n"
-		"	gl_Position.z = 2.0*log(gl_Position.w/near)/log(far/near)-1;"
-		"	gl_Position.z *= gl_Position.w;"
+		/*"	if( hyperTime > 0 ){\n"
+		"		gl_Position.x = gl_Position.x * cos(gl_Position.z*hyperTime);\n"
+		"		gl_Position.y = gl_Position.y * cos(gl_Position.z*hyperTime);\n"
+		"	}\n"*/
+		"	gl_Position.z = 2.0*log(gl_Position.w/near)/log(far/near)-1;\n"
+		"	gl_Position.z *= gl_Position.w;\n"
+		"	Distance = FragPos.x*FragPos.x + FragPos.y*FragPos.y + FragPos.z*FragPos.z;\n"
 		"}\n";
-	shaderFragSource = "#version 330 core\n"
-		"out vec4 color;\n"
-		"uniform sampler2D tex;\n"
-		"in vec2 TexCoords;\n"
-		"in vec3 Normal;\n"
-		"in vec3 FragPos;\n"
-		"uniform vec3 viewPos;\n"
-		"uniform vec3 lightDir;\n"
-		"uniform vec3 ambient;\n"
-		"uniform bool useLighting;\n"
-		"uniform bool useTexture;\n"
-		"void main() {\n"
-		"	if( useLighting ){"
+	shaderFragSource = R"(
+	#version 330 core
+	out vec4 color;
+	uniform sampler2D tex;
+	in vec2 TexCoords;
+	in vec3 Normal;
+	in vec3 FragPos;
+	in float Distance;
+	uniform vec3 viewPos;
+	uniform vec3 lightDir;
+	uniform vec3 ambient;
+	uniform vec3 endColor;
+	uniform bool useLighting;
+	uniform bool useTexture;
+	uniform bool useFade;
+	void main() {
+		if( useLighting ){
 		// diffuse
-		"		vec3 lightDirN = normalize(lightDir);"
-		"		vec3 norm = normalize(Normal);"
-		"		float diff = max(dot(norm, lightDirN), 0.0);"
-		"		vec3 diffuse = diff * vec3(1.0);"
+			vec3 lightDirN = normalize(lightDir);
+			vec3 norm = normalize(Normal);
+			float diff = max(dot(norm, lightDirN), 0.0);
+			vec3 diffuse = diff * vec3(1.0);
 		// specular
-		"		float spec = 0;"
-		"		float specularStrength = 0.25;"
-		"		vec3 viewDir = normalize(viewPos - FragPos);"
-		"		vec3 reflectDir = reflect(-lightDirN, norm);"
-		"		spec = specularStrength * pow(max(dot(viewDir, reflectDir), 0.0), 16);"
-		"		vec3 specular = spec * vec3(1.0);"
+			float spec = 0;
+			float specularStrength = 0.25;
+			vec3 viewDir = normalize(viewPos - FragPos);
+			vec3 reflectDir = reflect(-lightDirN, norm);
+			spec = specularStrength * pow(max(dot(viewDir, reflectDir), 0.0), 16);
+			vec3 specular = spec * vec3(1.0);
 		// result
-		"		vec4 sample = texture(tex, TexCoords);\n"
-		"		color = vec4(ambient + diffuse + specular, 1.0) * sample;\n"
-		"	} else if( useTexture ){"
-		"		color = texture(tex, TexCoords);\n"
-		"	} else {"
-		"		color = vec4(ambient, 1.0);\n"
-		"	}"
-		"}\n";
+			vec4 sample = texture(tex, TexCoords);
+			color = vec4(ambient + diffuse + specular, 1.0) * sample;
+		} else if( useTexture ){
+			color = texture(tex, TexCoords);
+		} /*else if( useFade ){
+			color = vec4(ambient, Interp);
+		}*/ else {
+			color = vec4(ambient, 1.0);
+		}
+})";
 	shader = new GLShaderProgram(shaderVertSource, shaderFragSource);
 }
 
@@ -417,6 +430,7 @@ Controller::Controller(string name, bool isNew) {
 void Controller::setSystem(shared_ptr<Solarsystem> system) {
 	this->system = system;
 	int i;
+	hyperTime = 0.0f;
 
 	/*
 	[menuItems addObject:[[EHMenuItem alloc] initWithName:@"Jump" hotkey:keyValue( index[HYPER], val[HYPER] ) menu:nil width:128 target:self action:@selector(hyper)]];
@@ -549,10 +563,8 @@ void Controller::update() {
 			selection = static_pointer_cast<AI>(ships[shipIndex]);
 	}
 	if (keyMap[SDL_SCANCODE_D] && !oldKeys[SDL_SCANCODE_D]) {
-		if (curPlanet) {
-			glm::vec3 out = globalToLocal(curPlanet->pos);
-			cout << out.x << " " << out.y << " " << out.z << endl;
-		}
+		MAX_VELOCITY *= 2;
+		ACCELERATION *= 2;
 	}
 	/*if (NEW_PRESS(SELECT_SYSTEM)) {
 		if (!hyper) {
@@ -563,10 +575,11 @@ void Controller::update() {
 	}
 	if (NEW_PRESS(ORBIT))	// orbit
 		orbit = YES;
-	if (NEW_PRESS(HYPER))	// hyperspace
-		[EHMenu displayMenu : @"Hyperspace"];
-	//hyper = YES;
-	if (NEW_PRESS(LAND)) {	// land
+	*/if (NEWPRESS(HYPER)) {	// hyperspace
+		//[EHMenu displayMenu : @"Hyperspace"] ;
+		hyperspace = true;
+	}
+	/*if (NEW_PRESS(LAND)) {	// land
 		land = YES;
 	}
 	if (keys[index[FIRE_PRIMARY]] & val[FIRE_PRIMARY]) {
@@ -800,6 +813,7 @@ updateKeys:
 	Background::draw();
 
 	shader->use();
+	//shader->setUniformf("hyperTime", hyperTime);
 	shader->setUniformb("useLighting", true);
 	shader->setUniformb("useTexture", true);
 	shader->setUniform3f("viewPos", sys->pos.x, sys->pos.y, sys->pos.z);
@@ -818,6 +832,7 @@ updateKeys:
 	for ( shared_ptr<Spaceship>& ship : ships ) {
 		if (ship->state != DEAD) {
 			if (ship.get() != this) {
+				ship->position();
 				ship->draw();
 			}
 			else if (viewStyle == 1 || viewStyle == 3) {
@@ -892,24 +907,27 @@ updateKeys:
 	if (viewStyle != 2) {
 		float color[] = { 0, 1, 0 };
 		if (selection) {	// draw ship stats
-	//		string = [[NSString stringWithFormat : @"Shield: %d%% (%d)", 100 * (int)selection->shields / selection->maxShield, (int)selection->shields]cString];
-	//		[self drawString : string atX : 5 / 6. + 0.01 y : 1. * (screenHeight - screenWidth / 6 - 7.6 * screenWidth / 30 + 15) / screenHeight] ;
-	//		string = [[NSString stringWithFormat : @"Armor:  %d%% (%d)", 100 * selection->armor / selection->maxArmor, selection->armor]cString];
-	//		[self drawString : string atX : 5 / 6. + 0.01 y : 1. * (screenHeight - screenWidth / 6 - 7.6 * screenWidth / 30) / screenHeight] ;
-	//		string = [selection->name cString];
+			ostringstream stream;
+			stream << "Shield: " << 100 * selection->shields / selection->maxShield << "% (" << selection->shields << ")";
+			drawString(stream.str().c_str(), 5 * screenWidth / 6. + 16, 1.0f * (screenHeight - screenWidth / 6.0f - 7.6 * screenWidth / 30.0f + 15) / screenHeight, color);
+			stream.str("");
+			stream.clear();
+			stream << "Armor: " << 100 * selection->armor / selection->maxArmor << "% (" << selection->armor << ")";
+			drawString(stream.str().c_str(), 5 * screenWidth / 6. + 16, 1.0f * (screenHeight - screenWidth / 6.0f - 7.6 * screenWidth / 30.0f) / screenHeight, color);
+			str = selection->name;
 		}
 		else
 			str = "<No Ship Selected>";
-		drawString(str.c_str(), 5 * screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 3.6 * screenWidth / 30.0f), color);
+		drawString(str.c_str(), 5 * screenWidth / 6. + 16, 1.0f * (screenHeight - screenWidth / 6.0f - 3.6 * screenWidth / 30.0f), color);
 		if (selection)
-			drawString(selection->gov->name.c_str(), 5 * screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 4 * screenWidth / 30.0f), color);
+			drawString(selection->gov->name.c_str(), 5 * screenWidth / 6. + 16, 1.0f * (screenHeight - screenWidth / 6.0f - 4 * screenWidth / 30.0f), color);
 		if (curPlanet) {		// draw planet name
 			str = curPlanet->name;
 			if (centerOfRotation == curPlanet)
 				str += " <ORB>";
 		}
 		else str = "<No Planet Selected>";
-		drawString(str.c_str(), 5*screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 2.6 * screenWidth / 30.0f), color);
+		drawString(str.c_str(), 5*screenWidth / 6. + 16, 1.0f * (screenHeight - screenWidth / 6.0f - 2.6 * screenWidth / 30.0f), color);
 		if (pos.x * pos.x + pos.z * pos.z + pos.y * pos.y < jumpDistance && system->planets.size() > 0)
 			color[1] = 0.5f;
 		if (systemIndex == -1)
@@ -917,7 +935,7 @@ updateKeys:
 		else {
 			str = system->links[systemIndex]->name;
 		}
-		drawString(str.c_str(), 5 * screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 1.6 * screenWidth / 30.0f), color);
+		drawString(str.c_str(), 5 * screenWidth / 6. + 16, 1.0f * (screenHeight - screenWidth / 6.0f - 1.6 * screenWidth / 30.0f), color);
 		color[1] = 1.0f;
 		if (secondaryIndex == -1)
 			str = "<No Secondary Weapon>";
@@ -929,11 +947,11 @@ updateKeys:
 	//			count = [weap count];
 	//		string = [[NSString stringWithFormat : @"%@: %d", _name, count]cString];
 		}
-		drawString(str.c_str(), 5 * screenWidth / 6. + 0.01, 1.0f * (screenHeight - screenWidth / 6.0f - 0.6f * screenWidth / 30.0f), color);
-		/*if (!paused && FACTOR > 0.0f) {
-			str = "FPS = " + (int)(1.0f / FACTOR);
+		drawString(str.c_str(), 5 * screenWidth / 6. + 16, 1.0f * (screenHeight - screenWidth / 6.0f - 0.6f * screenWidth / 30.0f), color);
+		if (!paused && FACTOR > 0.0f) {
+			str = "FPS = " +to_string((int)(1.0f / FACTOR));
 			drawString(str.c_str(), 0.005, 0.95, color);
-		}*/
+		}
 	}
 
 	/*if (messageTime < 5 && message) {
@@ -1052,6 +1070,8 @@ void Controller::setShip(shared_ptr<Spaceship> ship) {
 }
 
 void Controller::doHyperspace(){
+	if (hyperTime == 0.0f)
+		hyperTime += FACTOR;
 }
 
 void Controller::doLand(){
@@ -1159,15 +1179,7 @@ void Controller::drawNavTab() {
 }
 
 void Controller::drawSelectionTab(int tab) {
-	glViewport(5 * screenWidth / 6, screenHeight - screenWidth / 6 - tab * (screenWidth / 30), screenWidth / 6 + 1, screenWidth / 5. - screenWidth / 6.);
-	glBindTexture(GL_TEXTURE_2D, texture[WIDGET_TEXTURE]);
-	frameShader->use();
-	frameShader->setUniformb("useTexture", true);
-	frameShader->setUniformb("useBox", false);
-	frameShader->setUniform3f("color", 1.0f, 1.0f, 1.0f);
-	glBindVertexArray(squareVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glViewport(0, 0, screenWidth, screenHeight);
+	GLShaderProgram::drawRectangle(5.0f * screenWidth / 6, screenHeight - screenWidth / 6.0f - tab * (screenWidth / 30.0f), screenWidth / 6.0f + 1, screenWidth / 5.0f - screenWidth / 6.0f, 0, 0, 1, 0.25f, texture[WIDGET_TEXTURE]);
 }
 
 void Controller::drawInfoTab() {
@@ -1183,7 +1195,32 @@ void Controller::drawInfoTab() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	if (selection) {
-
+		shader->use();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDisable(GL_CULL_FACE);
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, t/5, glm::vec3(0, 1, 0));
+		constexpr float tilt = 15.0f * pi / 180.0f;
+		model = glm::rotate(model, tilt, glm::vec3(0, 0, 1));
+		model = glm::scale(model, glm::vec3(1.0f / sqrt(2), 1.0f / sqrt(2), 1.0f / sqrt(2)));
+		shader->setUniformMat4("model", model);
+		glm::mat4 view = glm::lookAt(glm::vec3(0, 0, -3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		shader->setUniformMat4("view", view);
+		glm::mat4 projection = glm::mat4(1.0f);
+		shader->setUniformMat4("projection", projection);
+		shader->setUniformb("useLighting", false);
+		shader->setUniformb("useTexture", false);
+		if (selection->state == ALIVE) {
+			shader->setUniform3f("ambient", 0, 1, 0);
+			if( enemies.count(selection) )
+				shader->setUniform3f("ambient", 0.5f, 0, 0);
+		}
+		else {
+			shader->setUniform3f("ambient", 0.5f, 0.5f, 0.5f);
+		}
+		selection->Object3D::draw();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_CULL_FACE);
 	}
 
 	glViewport(0, 0, screenWidth, screenHeight);

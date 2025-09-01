@@ -12,113 +12,11 @@ vector<shared_ptr<EHButton>> EHButton::buttons;
 shared_ptr<EHButton> EHButton::mouseButton;
 map<string, vector<shared_ptr<EHButton>>> EHButton::sets;
 vector<shared_ptr<EHButton>> EHButton::toDelete;
-GLShaderProgram* EHButton::shader;
-GLuint EHButton::leftVBO, EHButton::leftVAO, EHButton::leftEBO, EHButton::midVBO, EHButton::midVAO, EHButton::midEBO, EHButton::rightVBO, EHButton::rightVAO, EHButton::rightEBO;
 
 void EHButton::initialize() {
 	buttonTex = 0;
 	int tempWidth = 0, tempHeight = 0;
 	Texture::loadTexture(Controller::basePath + "Images/Button.png", &buttonTex, &tempWidth, &tempHeight);
-
-	string vertexShader = "#version 330 core\n"
-		"layout(location = 0) in vec2 pos;\n"
-		"layout(location = 1) in vec2 tex;\n"
-		"out vec2 TexCoord;\n"
-		"uniform mat4 transform;\n"
-		"uniform float width;\n"
-		"uniform float xOffset;\n"
-		"uniform float yOffset;\n"
-		"uniform float delta;\n"
-		"void main() {\n"
-		"	gl_Position = transform * vec4(pos.x * width + xOffset, pos.y + yOffset, 0.0, 1.0);\n"
-		"	TexCoord = vec2(tex.x, tex.y+delta);\n"
-		"}\n";
-
-	string fragmentShader = "#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"in vec2 TexCoord;\n"
-		"uniform sampler2D tex;\n"
-		"void main() {\n"
-		"	FragColor = texture(tex, TexCoord);\n"
-		"}\n";
-
-	shader = new GLShaderProgram(vertexShader, fragmentShader);
-	shader->use();
-	shader->setUniformMat4("transform", GLShaderProgram::orthoTransform);
-
-	float leftVertices[] = {
-		0, 0, 0, 0,
-		1, 0, .25, 0,
-		1, 32, .25, -.25,
-		0, 32, 0, -.25
-	};
-
-	float midVertices[] = {
-		0, 0, .25, 0,
-		1, 0, .75, 0,
-		1, 32, .75, -.25,
-		0, 32, .25, -.25
-	};
-
-	float rightVertices[] = {
-		0, 0, .75, 0,
-		1, 0, 1, 0,
-		1, 32, 1, -.25,
-		0, 32, .75, -.25
-	};
-
-	GLuint indices[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
-
-	glGenVertexArrays(1, &leftVAO);
-	glBindVertexArray(leftVAO);
-
-	glGenBuffers(1, &leftVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, leftVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(leftVertices), leftVertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glGenBuffers(1, &leftEBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, leftEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glGenVertexArrays(1, &midVAO);
-	glBindVertexArray(midVAO);
-
-	glGenBuffers(1, &midVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, midVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(midVertices), midVertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glGenBuffers(1, &midEBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, midEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glGenVertexArrays(1, &rightVAO);
-	glBindVertexArray(rightVAO);
-
-	glGenBuffers(1, &rightVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, rightVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(rightVertices), rightVertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glGenBuffers(1, &rightEBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rightEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 }
 
 void EHButton::update() {
@@ -266,29 +164,15 @@ void EHButton::draw() {
 
 	glDisable(GL_DEPTH_TEST);
 
-	shader->use();
-	glBindTexture(GL_TEXTURE_2D, buttonTex);
-	shader->setUniformf("width", 32);
-	shader->setUniformf("xOffset", x);
-	shader->setUniformf("yOffset", y);
-	shader->setUniformf("delta", delta);
-	glBindVertexArray(leftVAO);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	shader->setUniformf("xOffset", x + 32);
-	shader->setUniformf("width", width - 64);
-	glBindVertexArray(midVAO);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	shader->setUniformf("xOffset", x + width - 32);
-	shader->setUniformf("width", 32);
-	glBindVertexArray(rightVAO);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+	GLShaderProgram::drawRectangle(x, y, 32, 32, 0, -.25f+delta, .25f, 0+delta, buttonTex);
+	GLShaderProgram::drawRectangle(x+32, y , width-64, 32, .25f, -.25f+delta, .75f, 0+delta, buttonTex);
+	GLShaderProgram::drawRectangle(x+width-32, y, 32, 32, .75f, -.25f+delta, 1, 0+delta, buttonTex);
 
 	float* color;
-	float pressedAndMouse[3] = {0.75, 0.88, 1};
+	float pressedAndMouse[3] = {0.75f, 0.88f, 1};
 	float mouseIn[3] = {0, 1, 1};
 	float mouseOut[3] = { 0, 1, 0 };
-	float inactive[3] = { .2, .3, .3 };
+	float inactive[3] = { .2f, .3f, .3f };
 	if (active) {
 		if (_pressed && _mouseIn)
 			color = pressedAndMouse;
@@ -300,7 +184,7 @@ void EHButton::draw() {
 	else
 		color = inactive;
 
-	Controller::drawString(text, x+20.0, y+9.0, color);
+	Controller::drawString(text, x+20.0f, y+9.0f, color);
 
 	glEnable(GL_DEPTH_TEST);
 

@@ -63,6 +63,8 @@ set(SOURCES
     "spaceship.h"
     "sphere.cpp"
     "sphere.h"
+    "stardust.cpp"
+    "stardust.h"
     "texture.cpp"
     "texture.h"
     "type.cpp"

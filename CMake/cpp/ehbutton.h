@@ -19,8 +19,6 @@ protected:
 	static shared_ptr<EHButton> mouseButton;
 	static map<string, vector<shared_ptr<EHButton>>> sets;
 	static vector<shared_ptr<EHButton>> toDelete;
-	static GLShaderProgram* shader;
-	static GLuint leftVBO, leftVAO, leftEBO, midVBO, midVAO, midEBO, rightVBO, rightVAO, rightEBO;
 	static GLuint buttonTex;
 
 public:
